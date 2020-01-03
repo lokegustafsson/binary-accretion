@@ -1,0 +1,58 @@
+\documentclass{report}
+
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{subfiles}
+
+\usepackage[style=verbose-trad2]{biblatex}
+\bibliography{references.bib}
+
+% Title page
+\makeatletter
+\newcommand{\subtitle}[1]{\def\@subtitle{#1}}
+\newcommand{\supervisor}[1]{\def\@supervisor{#1}}
+\makeatother
+\title{A very good title}
+\subtitle{An even better subtitle is even better!}
+\author{Loke Gustafsson}
+\supervisor{Mats Gustafsson}
+\date{\today}
+
+% Chapter formatting
+\titleformat{\chapter}
+    {\Large\bfseries} % format
+    {}                % label
+    {0pt}             % sep
+    {\huge}           % before-code
+
+% Document
+\begin{document}
+
+\subfile{titlepage.tex}
+
+\chapter*{Abstract}
+    \subfile{abstract.tex}
+
+\tableofcontents
+
+\chapter{Introduction}
+    \subfile{introduction.tex}
+
+\chapter{Theory}
+    \section{Smoothed-particle Hydrodynamics}
+    \subfile{theory/smoothed_particle_hydrodynamics.tex}
+
+\chapter{Method}
+    \subfile{method.tex}
+
+\chapter{Result}
+    \subfile{result.tex}
+
+\chapter{Discussion}
+    \subfile{discussion.tex}
+
+\printbibliography
+
+\end{document}

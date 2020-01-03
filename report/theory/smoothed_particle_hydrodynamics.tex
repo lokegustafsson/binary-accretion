@@ -1,0 +1,73 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+\subsection{Introduction}
+Smoothed-particle hydrodynamics (SPH) is a method in computational fluid dynamics used to numerically solve a system of differential equations. Insert history.
+
+SPH is a particle-based, Lagrangian method. This confers several advantages over mesh-based, Eulerian methods in astrophysical problems such as those studied in this paper:
+\begin{enumerate}
+    \item The lack of boundary conditions.
+    \item Large regions of low density
+    \item Adaptive resolutions
+\end{enumerate}
+
+\subsection{Fundamentals}
+For a given vector or scalar field $A$ we define the integral interpolant $A_I \approx A$ as
+
+\begin{equation}
+    A_I(\bm{r}) = \int A(\bm{r}) W(\bm{r} - \bm{r'}, h) d\bm{r'}
+\end{equation}
+
+where $\bm{r}$ and $\bm{r'}$ are position vectors with units $m$ and $h$ is a scalar ``smoothing length'' with units $m$. The (scalar) kernel function $W(\bm{r}, h)$ has units $m^{-3}$ and satisfies
+
+\begin{equation}
+    \int W(\bm{r}, h) d\bm{r} = 1
+\end{equation}
+
+and
+
+\begin{equation}
+    \lim_{h\to0} W(\bm{r}, h) d\bm{r} = \delta(x) = \begin{cases}
+        +\infty & \text{for } x = 0 \\
+        0 & \text{otherwise} \end{cases}
+\end{equation}
+
+The field $A_I$ is a smoothed version of $A$, with a granularity dependent on $h$. The core idea in SPH is to approximate the integral interpolant with a finite sum over the particles, and so we define the summation interpolant $A_S \approx A_I$ as
+
+\begin{equation}
+    A_S(\bm{r}) = \sum_{b} V_b A(b) W(\bm{r} - \bm{r_b}, h)
+\end{equation}
+
+where the sum is over all the SPH particles. The particles each have a position $\bm{r}$, velocity $\bm{v}$, mass $m$ and thermal energy $u$. All other fields have to be computed and interpolated from these, the most fundamental of which is the density.
+
+The density field is particularly important due to the particles having known masses, and the summation interpolant using the volumes of the particles. Writing the volume $V_b$ as $\dfrac{m_b}{\rho(\bm{r_b})}$ allows us to talk about the density rather than the volume:
+
+\begin{equation} \label{eq:2.5}
+    A_S(\bm{r}) = \sum_{b} \frac{m_b}{\rho(\bm{r_b})} A(\bm{r_b}) W(\bm{r} - \bm{r_b}, h)
+\end{equation}
+
+additionally giving us the density interpolant for free
+
+\begin{equation}
+    \rho_S(\bm{r}) = \sum_{b} \frac{m_b}{\rho(\bm{r_b})} \rho(\bm{r_b}) W(\bm{r} - \bm{r_b}, h) = \sum_{b} m_b W(\bm{r} - \bm{r_b}, h)
+\end{equation}
+
+At this point we drop the $I$ and $S$ subscripts for the interpolants since this would be unnecessarily verbose and intent will be clear from context. This allows us to shorten $A_S(\bm{r_b})$ to $A_b$. We will also write $W(\bm{r_a} - \bm{r_b}, h)$ as $W_{ab}$ and let $\nabla_a$ denote the gradient with respect to the space coordinates of particle $a$.
+
+\subsection{Operators}
+In order to solve the differential equations we need a way to compute gradients, divergence and curls within the SPH framework. More specifically, we need a way to compute $\nabla A$, $\nabla\cdot\bm{F}$ and $\nabla\times\bm{F}$, where $A$ and $\bm{F}$ are arbitrary scalar and vector fields respectively.
+
+Using (\ref{eq:2.5}) we can write $(\nabla A)_a$ as
+
+\begin{equation}
+    (\nabla A)_a = (\nabla_a A)_a =
+    \sum_b \frac{m_b}{\rho_b} A_b \nabla_a W_{ab} =
+    \sum_b \frac{m_b A_b \nabla_a W_{ab}}{\sum_c m_c W_{bc}}
+\end{equation}
+
+giving us the gradient of any field for which we can compute $A_b$.
+
+However, it turns out \autocite{monaghan1992} that this nested sum decreases precision. Instead, the usual approach is to calulate the interpolated $(\nabla(\rho A))_a$ and then retrieve $A$ through $\rho\nabla A = \nabla(\rho A) - \nabla\rho A$
+
+\end{document}
