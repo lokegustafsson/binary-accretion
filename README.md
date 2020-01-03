@@ -1,0 +1,3 @@
+This is the repository for my diploma project in my last year of Swedish high school. `src/` contains the simulation code and `report/` contains the report. I am doing an astrophysical fluid dynamics simulation of accretion during binary star formation, along the lines of [this PhD Thesis](https://www.astro.ex.ac.uk/people/mbate/Preprints/thesis/thesis.html), but the exact scope is yet to be determined.
+
+This file will be updated as the project progresses
