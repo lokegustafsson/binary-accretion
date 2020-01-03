@@ -1,0 +1,12 @@
+[package]
+name = "star_cluster_formation"
+version = "0.1.0"
+authors = ["Loke Gustafsson <lokeg2002@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+minifb = "0.15"
+rand = "0.7"
+rayon = "1.3"
