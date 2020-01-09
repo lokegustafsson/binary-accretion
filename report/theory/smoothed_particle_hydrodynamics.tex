@@ -68,6 +68,49 @@ Using (\ref{eq:2.5}) we can write $(\nabla A)_a$ as
 
 giving us the gradient of any field for which we can compute $A_b$.
 
-However, it turns out \autocite{monaghan1992} that this nested sum decreases precision. Instead, the usual approach is to calulate the interpolated $(\nabla(\rho A))_a$ and then retrieve $A$ through $\rho\nabla A = \nabla(\rho A) - \nabla\rho A$
+However, it turns out \autocite{monaghan1992} that this nested sum decreases precision. Instead, the usual approach is to calulate the interpolated $(\nabla(\rho A))_a$ and then retrieve $A$ through $\rho\nabla A = \nabla(\rho A) - \nabla\rho A$.
+
+$\rho A$ is a field like any other, but the fact that the density cancels in its interpolant makes the computation simpler:
+
+\begin{equation}
+    \nabla_a (\rho A) = \nabla_a \sum_b \frac{m_b}{\rho_b} \rho_b A_b W_{ab} = \sum_b m_b A_b \nabla_a W_{ab}
+\end{equation}
+
+$\nabla A$ is then computed as
+
+\begin{equation}
+    \rho_a (\nabla A)_a = \nabla_a (\rho A) - (\nabla\rho)_a A_a = \sum_b m_b (A_b - A_a) \nabla_a W_{ab}
+\end{equation}
+
+Similarly using the product rules of the divergence and curl and simplifying gives us the two other operators:
+
+\begin{equation}
+    \rho_a (\nabla\cdot\bm{F})_a = \sum_b m_b (\bm{F}_b - \bm{F}_a) \cdot \nabla_a W_{ab}
+\end{equation}
+
+\begin{equation}
+    \rho_a (\nabla\times\bm{F})_a = - \sum_b m_b (\bm{F}_b - \bm{F}_a) \times \nabla_a W_{ab}
+\end{equation}
+
+However, this is not the entire story as SPH allows most fields to be interpolated in different ways. In particular, RETURN WHEN I ACTUALLY UNDERSTAND THE SYMMETRIC PRESSURE INTERPOLANT
+
+
+\subsection{Governing equations}
+
+This work uses the Euler equation for momentum balance of a compressible inviscid fluid:
+
+\begin{equation}
+    \frac{d\bm{v_a}}{dt} = - \frac{1}{\rho_a} (\nabla P)_a + \bm{g}_a
+\end{equation}
+
+A mass balance equation is not necessary as the density is interpolated from the particle masses in each iteration.
+
+The only external force considered is gravity, as magnetism, radiative transfer and special relativity are all ignored in this work: (The gravitational field is the negative gradient of the gravitational potential field)
+
+\begin{equation}
+    \bm{g}_a = -\nabla_a\int\frac{-G\rho(\bm{r'})}{|\bm{r_a} - \bm{r'}|} d\bm{r}' = \int\frac{G\rho(\bm{r'})(\bm{r_a}-\bm{r'})}{|\bm{r_a}-\bm{r'}|^3}
+\end{equation}
+
+This integral can be computed by summing over all the particles. Note that this is not an interpolation integral, and computing it naively for all the particles would take quadratic time regardless of the kernel function. For this reason, we use a more sophisticated tree structure to compute the gravitational acceleration.
 
 \end{document}
