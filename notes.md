@@ -1,6 +1,21 @@
-## Features
-- [x] Barebones O(n^2) gravity simulation
-- [ ] Save video file
+## Algorithmic TODOs
+- [x] O(n^2) gravity simulation
+- [ ] O(n^2) SPH pressure forces
+- [ ] Well-separated tree construction
+- [ ] O(n*k) SPH using neighbors from tree
+- [ ] O(n) gravity using first-order almost-FMM
+- [ ] Higher-order FMM gravity
+- [ ] Initial conditions generator
+
+## Program feature TODOs
+- [ ] Command line simulation configuration
+- [ ] Capture video file
+- [x] 2D projection camera
+- [ ] 3D camera
+- [ ] Attitude indicator
+- [ ] Camera movement control
+- [ ] Pause/unpause simulation
+- [ ] Toggleable: view different fields
 
 ## Components
 - `Vector3` is used fot all linear algebra
