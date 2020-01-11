@@ -58,7 +58,7 @@ impl Particle {
         surrounding
             .iter()
             .map(|other| other.mass * (other.pos - self.pos).dot(&self.grad_kernel(other)))
-            .sum()
+            .sum::<Float>()
             / self_density
     }
 
@@ -81,7 +81,7 @@ impl Particle {
                         - self.pressure_factor * self_density)
                     * self.grad_kernel(other_particle)
             })
-            .sum()
+            .sum::<Vector3>()
             / self_density
     }
 
