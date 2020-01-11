@@ -108,9 +108,23 @@ A mass balance equation is not necessary as the density is interpolated from the
 The only external force considered is gravity, as magnetism, radiative transfer and special relativity are all ignored in this work: (The gravitational field is the negative gradient of the gravitational potential field)
 
 \begin{equation}
-    \bm{g}_a = -\nabla_a\int\frac{-G\rho(\bm{r'})}{|\bm{r_a} - \bm{r'}|} d\bm{r}' = \int\frac{G\rho(\bm{r'})(\bm{r_a}-\bm{r'})}{|\bm{r_a}-\bm{r'}|^3}
+    \bm{g}_a = -\nabla_a\int\frac{-G\rho(\bm{r'})}{|\bm{r_a} - \bm{r'}|} d\bm{r'} = \int\frac{G\rho(\bm{r'})(\bm{r_a}-\bm{r'})}{|\bm{r_a}-\bm{r'}|^3} d\bm{r'}
 \end{equation}
 
 This integral can be computed by summing over all the particles. Note that this is not an interpolation integral, and computing it naively for all the particles would take quadratic time regardless of the kernel function. For this reason, we use a more sophisticated tree structure to compute the gravitational acceleration.
+
+Calculating the gradient of the pressure requires us to compute the pressure at the particles using the ideal gas law.
+
+\begin{equation}
+    \frac{2E}{3} = nRT = PV = \frac{Pm}{\rho}
+\end{equation}
+
+Giving us the pressure at a particle
+
+\begin{equation}
+    P_a = \frac{2 E_a}{3 m_a} \rho_a = \tau_a \rho_a
+\end{equation}
+
+The pressure factor $\tau_a = \frac{2E_a}{3m_a}$ is constant since no conduction is modelled.
 
 \end{document}
