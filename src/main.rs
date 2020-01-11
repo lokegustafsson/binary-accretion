@@ -52,7 +52,10 @@ pub fn main() {
         if let Some(radius) =
             observer.observe_idealised_radius(simulation.particles(), simulation.densities())
         {
-            println!("Idealised radius: {} (Initial actual: {:e})", radius, RADIUS);
+            println!(
+                "Idealised radius: {} (Initial actual: {:e})",
+                radius, RADIUS
+            );
         }
 
         // Looping meta stuff
