@@ -1,6 +1,7 @@
 ## Algorithmic TODOs
 - [x] O(n^2) gravity simulation
-- [x] O(n^2) SPH pressure forces
+- [x] O(n^2) isothermal SPH pressure forces
+- [ ] Adiabatic SPH
 - [ ] Well-separated tree construction
 - [ ] O(n*k) SPH using neighbors from tree
 - [ ] O(n) gravity using first-order almost-FMM
