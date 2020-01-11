@@ -87,9 +87,19 @@ impl Vector3 {
     }
 }
 
+impl std::iter::Sum<Vector3> for Vector3 {
+    fn sum<I: Iterator<Item = Vector3>>(iter: I) -> Vector3 {
+        iter.fold(Vector3::zero(), |acc, v| acc + v)
+    }
+}
+
 impl std::fmt::Display for Vector3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}, {}, {}]", self.items[0], self.items[1], self.items[2])
+        write!(
+            f,
+            "[{}, {}, {}]",
+            self.items[0], self.items[1], self.items[2]
+        )
     }
 }
 

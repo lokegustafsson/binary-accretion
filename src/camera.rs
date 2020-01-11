@@ -1,16 +1,8 @@
 use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
-use std::u8;
 
 pub trait Camera {
-    fn view(
-        &self,
-        buffer: &mut Vec<u32>,
-        width: usize,
-        height: usize,
-        particles: Vec<&Particle>,
-        particle_mass_saturation: Float,
-    );
+    fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]);
 }
 
 pub struct FlatProjectionCamera {
@@ -37,14 +29,7 @@ impl FlatProjectionCamera {
 }
 
 impl Camera for FlatProjectionCamera {
-    fn view(
-        &self,
-        buffer: &mut Vec<u32>,
-        width: usize,
-        height: usize,
-        particles: Vec<&Particle>,
-        particle_mass_saturation: Float,
-    ) {
+    fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]) {
         assert_eq!(buffer.len(), width * height);
         for pixel in buffer.iter_mut() {
             *pixel = 0x000000;
@@ -57,12 +42,7 @@ impl Camera for FlatProjectionCamera {
             if 0.0 <= x && x < 1.0 && 0.0 <= y && y < 1.0 {
                 let x = (width as Float * x) as usize;
                 let y = (height as Float * y) as usize;
-                let pixel = &mut (buffer[y * width + x]);
-                *pixel = 0x010101
-                    * u8::saturating_add(
-                        *pixel as u8,
-                        (255.0 * particle.mass / particle_mass_saturation) as u8,
-                    ) as u32;
+                buffer[y * width + x] = 0xFFFFFF;
             }
         }
     }
