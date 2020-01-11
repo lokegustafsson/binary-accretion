@@ -55,27 +55,34 @@ impl Particle {
 
     // The divergence of velocity at this particle
     pub fn div_vel(&self, self_density: Float, surrounding: &[Particle]) -> Float {
-        surrounding.iter().fold(0.0, |acc, other| {
-            acc + other.mass * (other.pos - self.pos).dot(&self.grad_kernel(other))
-        }) / self_density
+        surrounding
+            .iter()
+            .map(|other| other.mass * (other.pos - self.pos).dot(&self.grad_kernel(other)))
+            .sum()
+            / self_density
     }
 
     // This particle's density
     pub fn density(&self, surrounding: &[Particle]) -> Float {
         surrounding
             .iter()
-            .fold(0.0, |acc, other| acc + other.mass * self.kernel(other))
+            .map(|other| other.mass * self.kernel(other))
+            .sum()
     }
 
     // The gradient of pressure at this particle
     fn grad_pressure(&self, self_density: Float, surrounding: &[(&Particle, Float)]) -> Vector3 {
-        surrounding.iter().fold(Vector3::zero(), |acc, other| {
-            let (other_particle, other_density) = other;
-            acc + other_particle.mass
-                * (other_particle.pressure_factor * other_density
-                    - self.pressure_factor * self_density)
-                * self.grad_kernel(other_particle)
-        }) / self_density
+        surrounding
+            .iter()
+            .map(|other| {
+                let (other_particle, other_density) = other;
+                other_particle.mass
+                    * (other_particle.pressure_factor * other_density
+                        - self.pressure_factor * self_density)
+                    * self.grad_kernel(other_particle)
+            })
+            .sum()
+            / self_density
     }
 
     // The gaussian kernel

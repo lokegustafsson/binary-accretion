@@ -44,7 +44,8 @@ impl Vector3 {
         self.items
             .iter()
             .zip(other.items.iter())
-            .fold(0.0, |acc, (a, b)| acc + (*a) * (*b))
+            .map(|a, b| (*a) * (*b))
+            .sum()
     }
     pub fn norm_squared(&self) -> Float {
         self.dot(self)
