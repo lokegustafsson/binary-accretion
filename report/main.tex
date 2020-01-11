@@ -6,6 +6,9 @@
 \usepackage{titlesec}
 \usepackage{subfiles}
 
+\usepackage[hidelinks]{hyperref}
+\hypersetup{linktoc=all, }
+
 \usepackage[style=verbose-trad2]{biblatex}
 \bibliography{references.bib}
 
@@ -53,6 +56,6 @@
 \chapter{Discussion}
     \subfile{discussion.tex}
 
-\printbibliography
+\printbibliography[heading=bibintoc,title={References}]
 
 \end{document}
