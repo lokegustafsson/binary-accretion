@@ -1,5 +1,5 @@
 [package]
-name = "star_cluster_formation"
+name = "binary-accretion"
 version = "0.1.0"
 authors = ["Loke Gustafsson <lokeg2002@gmail.com>"]
 edition = "2018"
