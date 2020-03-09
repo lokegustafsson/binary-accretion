@@ -1,0 +1,28 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+What spatial partitioning system to use? It will be used to calculate the (constant number) of nearest neighbors to be used in SPH as well as provide the grouping for FMM.
+
+Requirements:
+\begin{enumerate}
+    \item Quickly find $k$ closest for use in SPH code
+    \item Well-seperated tree, preferable free of tesselation-based numerical artifacts
+    \item $O(n \log n)$ or better construction time, quick queries
+\end{enumerate}
+
+Possible systems:
+\begin{itemize}
+    \item Exact space-partitioning based nearest neighbor search - possible $O(n\log n)$ by using the chain algorithm with a space partitioning tree (k-d tree) allowing $O(\log n)$ nearest neighbor queries.
+    \item Approximate nearest neighbor search? How to construct in $O(n)$?
+    \item Octree! Can be constructed in $O(n)$, but query is $O(n\log n)$ and not easily extended to 
+\end{itemize}
+
+Perhaps reusing last tick's tree allows for faster construction? Also, Benz (1990) on the subject of octree numerical accuracy:
+
+\begin{displayquote}
+Tessellation methods are more efficient at forming and updating a tree, but they are less efficient at calculating the gravitational force. It is at present an open question as to whether tessellation methods or nearest neighbor methods dominate generally.
+\end{displayquote}
+
+\end{document}
