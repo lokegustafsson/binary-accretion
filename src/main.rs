@@ -1,13 +1,13 @@
 mod camera;
 mod constants;
-mod observe;
+mod statistics;
 mod particle;
 mod simulation;
 mod vector;
 
 use crate::camera::{Camera, FlatProjectionCamera};
 use crate::constants::{COUNT, DELTA_T, HEIGHT, MASS, RADIUS, SPEED, WIDTH};
-use crate::observe::Observer;
+use statistics::Statistics;
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
 use minifb::{Window, WindowOptions};
@@ -17,7 +17,7 @@ use std::time::{Duration, Instant};
 pub fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
     let mut simulation = Simulation::new(COUNT, RADIUS, SPEED, MASS);
-    let mut observer = Observer::new();
+    let mut stats = Statistics::new();
     let camera = FlatProjectionCamera::new(
         Vector3::zero(),
         WIDTH as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
@@ -46,11 +46,11 @@ pub fn main() {
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
 
         // Observables
-        if let Some(movement) = observer.observe_movement(simulation.particles()) {
+        if let Some(movement) = stats.observe_movement(simulation.particles()) {
             println!("Movement: {}", movement);
         }
         if let Some(radius) =
-            observer.observe_idealised_radius(simulation.particles(), simulation.densities())
+            stats.observe_idealised_radius(simulation.particles(), simulation.densities())
         {
             println!(
                 "Idealised radius: {} (Initial actual: {:e})",

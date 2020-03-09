@@ -2,14 +2,14 @@ use crate::constants::PI;
 use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
 
-pub struct Observer {
+pub struct Statistics {
     formatted_movement: String,
     formatted_ideal_radius: String,
 }
 
-impl Observer {
+impl Statistics {
     pub fn new() -> Self {
-        Observer {
+        Statistics {
             formatted_movement: String::from(""),
             formatted_ideal_radius: String::from(""),
         }
