@@ -11,6 +11,7 @@ pub struct Particle {
     pub pressure_factor: Float,
 
     pub smoothing_length: Float,
+    pub density: Float,
 }
 
 impl Particle {
@@ -28,7 +29,8 @@ impl Particle {
             // Pressure factor definition (using ideal gas law):
             //  pressure_factor = pressure / density = molarity * GAS_CONSTANT * temperature / mass = GAS_CONSTANT * temperature / molar_mass
             pressure_factor: GAS_CONSTANT * temperature / molar_mass,
-            smoothing_length: pos.norm().powf(1.0),
+            smoothing_length: pos.norm(),
+            density: std::f64::NAN,
         }
     }
 
@@ -45,21 +47,17 @@ impl Particle {
     }
 
     // The acceleration due to pressure according to the euler momentum equation
-    pub fn pressure_acceleration(
-        &self,
-        self_density: Float,
-        surrounding: &[(&Particle, Float)],
-    ) -> Vector3 {
-        -1.0 * self.grad_pressure(self_density, surrounding) / self_density
+    pub fn pressure_acceleration(&self, surrounding: &[Particle]) -> Vector3 {
+        -1.0 * self.grad_pressure(surrounding) / self.density
     }
 
     // The divergence of velocity at this particle
-    pub fn div_vel(&self, self_density: Float, surrounding: &[Particle]) -> Float {
+    pub fn div_vel(&self, surrounding: &[Particle]) -> Float {
         surrounding
             .iter()
             .map(|other| other.mass * (other.pos - self.pos).dot(self.grad_kernel(other)))
             .sum::<Float>()
-            / self_density
+            / self.density
     }
 
     // This particle's density
@@ -71,18 +69,16 @@ impl Particle {
     }
 
     // The gradient of pressure at this particle
-    fn grad_pressure(&self, self_density: Float, surrounding: &[(&Particle, Float)]) -> Vector3 {
+    fn grad_pressure(&self, surrounding: &[Particle]) -> Vector3 {
         surrounding
             .iter()
             .map(|other| {
-                let (other_particle, other_density) = other;
-                other_particle.mass
-                    * (other_particle.pressure_factor * other_density
-                        - self.pressure_factor * self_density)
-                    * self.grad_kernel(other_particle)
+                other.mass
+                    * (other.pressure_factor * other.density - self.pressure_factor * self.density)
+                    * self.grad_kernel(other)
             })
             .sum::<Vector3>()
-            / self_density
+            / self.density
     }
 
     // The gaussian kernel

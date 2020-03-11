@@ -32,15 +32,10 @@ impl Statistics {
         }
     }
 
-    pub fn observe_idealised_radius(
-        &mut self,
-        particles: &[Particle],
-        densities: &[Float],
-    ) -> Option<String> {
+    pub fn observe_idealised_radius(&mut self, particles: &[Particle]) -> Option<String> {
         let total_volume: Float = particles
             .iter()
-            .zip(densities)
-            .map(|(particle, density)| particle.mass / density)
+            .map(|particle| particle.mass / particle.density)
             .sum();
 
         let res = format!("{:.1e}", (total_volume * 3.0 / 4.0 / PI).powf(1.0 / 3.0));

@@ -7,7 +7,6 @@ use rayon::prelude::*;
 
 pub struct Simulation {
     particles: Vec<Particle>,
-    densities: Vec<Float>,
 }
 
 impl Simulation {
@@ -30,28 +29,23 @@ impl Simulation {
             )
         };
         let particles: Vec<Particle> = (0..count).map(|_| particle()).collect();
-        let densities = compute_densities(&particles);
-        Simulation {
-            particles,
-            densities,
-        }
+        let mut sim = Simulation { particles };
+        sim.recompute_density();
+        return sim;
     }
     pub fn step(&mut self, dt: Float) {
-        let particles_with_densities: Vec<(&Particle, Float)> =
-            self.particles.iter().zip(self.densities.clone()).collect();
-
         // O(n^2) time derivatives of particle properties
-        let time_derivatives: Vec<(Vector3, Float)> = particles_with_densities
+        let time_derivatives: Vec<(Vector3, Float)> = self
+            .particles
             .par_iter()
-            .map(|particle_with_density| {
-                let &(particle, density) = particle_with_density;
+            .map(|particle| {
                 // Acceleration from pressure forces and gravity
-                let acceleration = total_gravitational_acceleration(particle, &self.particles)
-                    + particle.pressure_acceleration(density, &particles_with_densities);
+                let acceleration = self.total_gravitational_acceleration(particle)
+                    + particle.pressure_acceleration(&self.particles);
 
                 // Compute dh/dt = -h / dim / density * d\rho/dt = -h / dim / density * (- density * div_vel) = div_vel * h / dim
                 let delta_smoothing_length =
-                    particle.div_vel(density, &self.particles) * particle.smoothing_length / 3.0;
+                    particle.div_vel(&self.particles) * particle.smoothing_length / 3.0;
 
                 (acceleration, delta_smoothing_length)
             })
@@ -62,31 +56,31 @@ impl Simulation {
             .zip(time_derivatives)
             .for_each(|(particle, deltas)| particle.update_properties(deltas, dt));
         // O(n^2) densities update
-        self.densities = compute_densities(&self.particles);
+        self.recompute_density();
     }
 
     pub fn particles(&self) -> &Vec<Particle> {
         &self.particles
     }
 
-    pub fn densities(&self) -> &Vec<Float> {
-        &self.densities
-    }
-}
+    fn recompute_density(&mut self) {
+        let densities: Vec<Float> = self
+            .particles
+            .iter()
+            .map(|p| p.density(&self.particles))
+            .collect();
 
-fn compute_densities(particles: &[Particle]) -> Vec<Float> {
-    particles
-        .par_iter()
-        .map(|particle| particle.density(particles))
-        .collect()
-}
-
-fn total_gravitational_acceleration(target: &Particle, particles: &[Particle]) -> Vector3 {
-    let mut acceleration = Vector3::zero();
-    for particle in particles {
-        if (particle.pos - target.pos).norm_squared() > 1.0 {
-            acceleration += target.gravitational_acceleration_from(particle);
+        for i in 0..self.particles.len() {
+            self.particles[i].density = densities[i];
         }
     }
-    acceleration
+
+    fn total_gravitational_acceleration(&self, target: &Particle) -> Vector3 {
+        self.particles()
+            .iter()
+            .filter(|p| (target.pos - p.pos).norm_squared() > 1.0)
+            .fold(Vector3::zero(), |acc, p| {
+                acc + target.gravitational_acceleration_from(p)
+            })
+    }
 }

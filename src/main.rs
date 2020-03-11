@@ -55,9 +55,7 @@ pub fn main() {
         if let Some(movement) = stats.observe_movement(simulation.particles()) {
             println!("Movement: {}", movement);
         }
-        if let Some(radius) =
-            stats.observe_idealised_radius(simulation.particles(), simulation.densities())
-        {
+        if let Some(radius) = stats.observe_idealised_radius(simulation.particles()) {
             println!(
                 "Idealised radius: {} (Initial actual: {:e})",
                 radius, RADIUS
