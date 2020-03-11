@@ -23,7 +23,7 @@ impl Simulation {
             let molar_mass = 0.001;
             Particle::new(
                 pos_unit * max_radius,
-                pos_unit.rotated_around_x(TWO_PI / 4.0) * speed,
+                pos_unit.rotated(Vector3::unit_x(), TWO_PI / 4.0) * speed,
                 total_mass / count as Float,
                 temperature,
                 molar_mass,

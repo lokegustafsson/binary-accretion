@@ -57,7 +57,7 @@ impl Particle {
     pub fn div_vel(&self, self_density: Float, surrounding: &[Particle]) -> Float {
         surrounding
             .iter()
-            .map(|other| other.mass * (other.pos - self.pos).dot(&self.grad_kernel(other)))
+            .map(|other| other.mass * (other.pos - self.pos).dot(self.grad_kernel(other)))
             .sum::<Float>()
             / self_density
     }

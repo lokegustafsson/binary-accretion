@@ -34,57 +34,44 @@ impl Vector3 {
         // -PI/2 <= latitude <= PI/2
         // -PI <= longitude <= PI
         Vector3::unit_x()
-            .rotated_around_y(latitude)
-            .rotated_around_z(longitude)
+            .rotated(Vector3::unit_y(), latitude)
+            .rotated(Vector3::unit_z(), longitude)
             * magnitude
     }
 
     // Operations
-    pub fn dot(&self, other: &Self) -> Float {
+    pub fn dot(self, other: Self) -> Float {
         self.items
             .iter()
             .zip(other.items.iter())
             .map(|(a, b)| (*a) * (*b))
             .sum()
     }
-    pub fn norm_squared(&self) -> Float {
+    pub fn cross(self, other: Self) -> Vector3 {
+        let [a1, a2, a3] = self.items;
+        let [b1, b2, b3] = other.items;
+        Vector3 {
+            items: [a2 * b3 - a3 * b2, a3 * b1 - a1 * b3, a1 * b2 - a2 * b1],
+        }
+    }
+    pub fn norm_squared(self) -> Float {
         self.dot(self)
     }
-    pub fn norm(&self) -> Float {
+    pub fn norm(self) -> Float {
         self.norm_squared().sqrt()
     }
-    // Rotations
-    pub fn rotated_around_x(&self, angle: Float) -> Vector3 {
-        Vector3 {
-            items: [
-                self.items[0],
-                self.items[1] * Float::cos(angle) - self.items[2] * Float::sin(angle),
-                self.items[1] * Float::sin(angle) + self.items[2] * Float::cos(angle),
-            ],
-        }
+    pub fn normalized(self) -> Vector3 {
+        self / self.norm()
     }
-    pub fn rotated_around_y(&self, angle: Float) -> Vector3 {
-        Vector3 {
-            items: [
-                self.items[0] * Float::cos(angle) - self.items[2] * Float::sin(angle),
-                self.items[1],
-                self.items[0] * Float::sin(angle) + self.items[2] * Float::cos(angle),
-            ],
-        }
-    }
-    pub fn rotated_around_z(&self, angle: Float) -> Vector3 {
-        Vector3 {
-            items: [
-                self.items[0] * Float::cos(angle) - self.items[1] * Float::sin(angle),
-                self.items[0] * Float::sin(angle) + self.items[1] * Float::cos(angle),
-                self.items[2],
-            ],
-        }
-    }
-    pub fn rotated_around_xyz(&self, angle_x: Float, angle_y: Float, angle_z: Float) -> Vector3 {
-        self.rotated_around_x(angle_x)
-            .rotated_around_y(angle_y)
-            .rotated_around_z(angle_z)
+    pub fn rotated(self, axis: Vector3, angle: Float) -> Vector3 {
+        let axis = axis.normalized();
+        let self_parallel_axis = axis.dot(self) * axis;
+        let self_orthogonal_axis = self - self_parallel_axis;
+        let self_orthogonal_rotated90 = axis.cross(self_orthogonal_axis);
+
+        angle.cos() * self_orthogonal_axis
+            + angle.sin() * self_orthogonal_rotated90
+            + self_parallel_axis
     }
 }
 

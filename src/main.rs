@@ -1,16 +1,16 @@
 mod camera;
 mod constants;
-mod statistics;
 mod particle;
 mod simulation;
+mod statistics;
 mod vector;
 
 use crate::camera::{Camera, FlatProjectionCamera};
 use crate::constants::{COUNT, DELTA_T, HEIGHT, MASS, RADIUS, SPEED, WIDTH};
-use statistics::Statistics;
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
-use minifb::{Window, WindowOptions};
+use minifb::{Key, Window, WindowOptions};
+use statistics::Statistics;
 use std::cmp;
 use std::time::{Duration, Instant};
 
@@ -18,13 +18,10 @@ pub fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
     let mut simulation = Simulation::new(COUNT, RADIUS, SPEED, MASS);
     let mut stats = Statistics::new();
-    let camera = FlatProjectionCamera::new(
+    let mut camera = FlatProjectionCamera::new(
         Vector3::zero(),
         WIDTH as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
         HEIGHT as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
-        0.0,
-        0.0,
-        0.0,
     );
 
     let mut window =
@@ -42,6 +39,15 @@ pub fn main() {
     while window.is_open() {
         // Simulation step and display
         simulation.step(DELTA_T);
+        camera.turn(
+            (1.0 / seconds_per_tick) as f64,
+            window.is_key_down(Key::A),
+            window.is_key_down(Key::D),
+            window.is_key_down(Key::W),
+            window.is_key_down(Key::S),
+            window.is_key_down(Key::Q),
+            window.is_key_down(Key::E),
+        );
         camera.view(&mut buffer, WIDTH, HEIGHT, simulation.particles());
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
 

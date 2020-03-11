@@ -1,29 +1,37 @@
+use crate::constants::{SECONDS_PER_REVOLUTION, TWO_PI};
 use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
 
 pub trait Camera {
     fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]);
+    fn turn(
+        &mut self,
+        current_fps: f64,
+        left: bool,
+        right: bool,
+        up: bool,
+        down: bool,
+        clockwise: bool,
+        counterclockwise: bool,
+    );
 }
 
 pub struct FlatProjectionCamera {
     pos: Vector3,
     horizontal: Vector3,
     vertical: Vector3,
+    horizontal_length: Float,
+    vertical_length: Float,
 }
 
 impl FlatProjectionCamera {
-    pub fn new(
-        pos: Vector3,
-        width: Float,
-        height: Float,
-        angle_x: Float,
-        angle_y: Float,
-        angle_z: Float,
-    ) -> Self {
+    pub fn new(pos: Vector3, width: Float, height: Float) -> Self {
         FlatProjectionCamera {
             pos,
-            horizontal: width * Vector3::unit_y().rotated_around_xyz(angle_x, angle_y, angle_z),
-            vertical: height * Vector3::unit_z().rotated_around_xyz(angle_x, angle_y, angle_z),
+            horizontal: Vector3::unit_x(),
+            vertical: Vector3::unit_y(),
+            horizontal_length: width,
+            vertical_length: height,
         }
     }
 }
@@ -37,13 +45,48 @@ impl Camera for FlatProjectionCamera {
 
         for particle in particles {
             let pos = particle.pos - self.pos;
-            let x = 0.5 + pos.dot(&self.horizontal) / self.horizontal.norm_squared();
-            let y = 0.5 + pos.dot(&self.vertical) / self.vertical.norm_squared();
+            let x = 0.5 + pos.dot(self.horizontal) / self.horizontal_length;
+            let y = 0.5 + pos.dot(self.vertical) / self.vertical_length;
             if 0.0 <= x && x < 1.0 && 0.0 <= y && y < 1.0 {
                 let x = (width as Float * x) as usize;
                 let y = (height as Float * y) as usize;
                 buffer[y * width + x] = 0xFFFFFF;
             }
         }
+    }
+    fn turn(
+        &mut self,
+        current_fps: f64,
+        left: bool,
+        right: bool,
+        up: bool,
+        down: bool,
+        clockwise: bool,
+        counterclockwise: bool,
+    ) {
+        let turn_angle = TWO_PI / current_fps / SECONDS_PER_REVOLUTION;
+        if left != right {
+            self.horizontal = self
+                .horizontal
+                .rotated(self.vertical, if right { turn_angle } else { -turn_angle });
+        }
+        if up != down {
+            self.vertical = self
+                .vertical
+                .rotated(self.horizontal, if up { turn_angle } else { -turn_angle });
+        }
+        if clockwise != counterclockwise {
+            let depth = self.horizontal.cross(self.vertical);
+            self.horizontal = self
+                .horizontal
+                .rotated(depth, if clockwise { turn_angle } else { -turn_angle });
+            self.vertical = self
+                .vertical
+                .rotated(depth, if clockwise { turn_angle } else { -turn_angle });
+        }
+        // Gram-Schmidt, making the vectors orthogonal again after floating point imprecision
+        self.vertical = self.vertical - self.horizontal.dot(self.vertical) * self.horizontal;
+        self.vertical = self.vertical.normalized();
+        self.horizontal = self.horizontal.normalized();
     }
 }
