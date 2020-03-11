@@ -2,21 +2,7 @@ use crate::constants::{SECONDS_PER_REVOLUTION, TWO_PI};
 use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
 
-pub trait Camera {
-    fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]);
-    fn turn(
-        &mut self,
-        current_fps: f64,
-        left: bool,
-        right: bool,
-        up: bool,
-        down: bool,
-        clockwise: bool,
-        counterclockwise: bool,
-    );
-}
-
-pub struct FlatProjectionCamera {
+pub struct Camera {
     pos: Vector3,
     horizontal: Vector3,
     vertical: Vector3,
@@ -24,9 +10,9 @@ pub struct FlatProjectionCamera {
     vertical_length: Float,
 }
 
-impl FlatProjectionCamera {
+impl Camera {
     pub fn new(pos: Vector3, width: Float, height: Float) -> Self {
-        FlatProjectionCamera {
+        Camera {
             pos,
             horizontal: Vector3::unit_x(),
             vertical: Vector3::unit_y(),
@@ -34,10 +20,8 @@ impl FlatProjectionCamera {
             vertical_length: height,
         }
     }
-}
 
-impl Camera for FlatProjectionCamera {
-    fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]) {
+    pub fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]) {
         assert_eq!(buffer.len(), width * height);
         for pixel in buffer.iter_mut() {
             *pixel = 0x000000;
@@ -54,7 +38,8 @@ impl Camera for FlatProjectionCamera {
             }
         }
     }
-    fn turn(
+
+    pub fn turn(
         &mut self,
         current_fps: f64,
         left: bool,

@@ -5,7 +5,7 @@ mod simulation;
 mod statistics;
 mod vector;
 
-use crate::camera::{Camera, FlatProjectionCamera};
+use crate::camera::Camera;
 use crate::constants::{COUNT, DELTA_T, HEIGHT, MASS, RADIUS, SPEED, WIDTH};
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
@@ -18,7 +18,7 @@ pub fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
     let mut simulation = Simulation::new(COUNT, RADIUS, SPEED, MASS);
     let mut stats = Statistics::new();
-    let mut camera = FlatProjectionCamera::new(
+    let mut camera = Camera::new(
         Vector3::zero(),
         WIDTH as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
         HEIGHT as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
