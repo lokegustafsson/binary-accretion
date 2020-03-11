@@ -30,46 +30,48 @@ impl Simulation {
         };
         let particles: Vec<Particle> = (0..count).map(|_| particle()).collect();
         let mut sim = Simulation { particles };
-        sim.recompute_density();
+        sim.recompute_densities_and_smoothing_lengths();
         return sim;
     }
     pub fn step(&mut self, dt: Float) {
         // O(n^2) time derivatives of particle properties
-        let time_derivatives: Vec<(Vector3, Float)> = self
+        let acceleration: Vec<Vector3> = self
             .particles
             .par_iter()
             .map(|particle| {
                 // Acceleration from pressure forces and gravity
-                let acceleration = self.total_gravitational_acceleration(particle)
-                    + particle.pressure_acceleration(&self.particles);
-
-                // Compute dh/dt = -h / dim / density * d\rho/dt = -h / dim / density * (- density * div_vel) = div_vel * h / dim
-                let delta_smoothing_length =
-                    particle.div_vel(&self.particles) * particle.smoothing_length / 3.0;
-
-                (acceleration, delta_smoothing_length)
+                self.total_gravitational_acceleration(particle)
+                    + particle.pressure_acceleration(&self.particles)
             })
             .collect();
         // O(n) particle updates
         self.particles
             .iter_mut()
-            .zip(time_derivatives)
-            .for_each(|(particle, deltas)| particle.update_properties(deltas, dt));
+            .zip(acceleration)
+            .for_each(|(particle, accel)| particle.update_properties(accel, dt));
         // O(n^2) densities update
-        self.recompute_density();
+        self.recompute_densities_and_smoothing_lengths();
     }
 
-    pub fn particles(&self) -> &Vec<Particle> {
+    pub fn particles(&self) -> &[Particle] {
         &self.particles
     }
 
-    fn recompute_density(&mut self) {
+    fn recompute_densities_and_smoothing_lengths(&mut self) {
+        let lengths: Vec<Float> = self
+            .particles
+            .iter()
+            .map(|p| p.smoothing_length(&self.particles))
+            .collect();
+        for i in 0..self.particles.len() {
+            self.particles[i].smoothing_length = lengths[i];
+        }
+        // Computing densities depends on having smoothing lengths
         let densities: Vec<Float> = self
             .particles
             .iter()
             .map(|p| p.density(&self.particles))
             .collect();
-
         for i in 0..self.particles.len() {
             self.particles[i].density = densities[i];
         }

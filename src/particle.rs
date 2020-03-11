@@ -1,5 +1,7 @@
-use crate::constants::{GAS_CONSTANT, GRAVITATIONAL_CONSTANT, PI};
+use crate::constants::{GAS_CONSTANT, GRAVITATIONAL_CONSTANT, NEIGHBORS, PI};
 use crate::vector::{Float, Vector3};
+use ordered_float::NotNan;
+use std::collections::BinaryHeap;
 
 #[derive(Copy, Clone)]
 pub struct Particle {
@@ -10,6 +12,7 @@ pub struct Particle {
     // Pressure divided by density, depends on temperature and some other properties according to the ideal gas law
     pub pressure_factor: Float,
 
+    // Associated values that are recomputed each tick
     pub smoothing_length: Float,
     pub density: Float,
 }
@@ -29,16 +32,28 @@ impl Particle {
             // Pressure factor definition (using ideal gas law):
             //  pressure_factor = pressure / density = molarity * GAS_CONSTANT * temperature / mass = GAS_CONSTANT * temperature / molar_mass
             pressure_factor: GAS_CONSTANT * temperature / molar_mass,
-            smoothing_length: pos.norm(),
             density: std::f64::NAN,
+            smoothing_length: std::f64::NAN,
         }
     }
 
-    pub fn update_properties(&mut self, deltas: (Vector3, Float), dt: Float) {
-        let (acceleration, delta_smoothing_length) = deltas;
+    pub fn update_properties(&mut self, acceleration: Vector3, dt: Float) {
         self.pos += self.vel * dt + acceleration * dt * dt / 2.0;
         self.vel += acceleration * dt;
-        self.smoothing_length += delta_smoothing_length * dt;
+    }
+
+    pub fn smoothing_length(&self, surrounding: &[Particle]) -> Float {
+        let mut neighbors: BinaryHeap<NotNan<Float>> = BinaryHeap::new();
+        for p in surrounding {
+            let dist = (self.pos - p.pos).norm_squared();
+            if neighbors.len() < NEIGHBORS || dist < **neighbors.peek().unwrap() {
+                neighbors.push(dist.into());
+            }
+            if neighbors.len() > NEIGHBORS {
+                neighbors.pop();
+            }
+        }
+        neighbors.into_iter().map(|x| *x).sum::<Float>() / (NEIGHBORS as Float)
     }
 
     pub fn gravitational_acceleration_from(&self, other: &Particle) -> Vector3 {

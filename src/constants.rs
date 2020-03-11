@@ -7,10 +7,12 @@ pub const SECONDS_PER_REVOLUTION: Float = 2.0;
 
 // Simulation
 pub const COUNT: usize = 500;
+pub const NEIGHBORS: usize = 50;
 pub const RADIUS: Float = 1e16; // About one light year
-pub const SPEED: Float = 0.0;
+pub const SPEED: Float = 100.0;
 pub const MASS: Float = 2e30; // About one solar mass
-pub const DELTA_T: Float = 3e10; // About 1000 years
+const YEAR: Float = 3e7;
+pub const DELTA_T: Float = 5000.0 * YEAR;
 
 // Mathematical
 pub const PI: Float = std::f64::consts::PI as Float;
