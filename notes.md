@@ -1,33 +1,35 @@
+## Physical TODOs
+- [x] Stable smoothing length calculation
+- [x] Statistics: conservation of momentum
+- [ ] Statistics: conservation of angular momentum
+- [ ] Statistics: conservation of energy
+- [ ] Electron degeneracy pressure
+- [ ] Artificial viscosity
+- [ ] Adiabatic: gas temperature
+- [ ] Adiabatic: dissipation in shocks
+- [ ] Initial conditions
+
 ## Algorithmic TODOs
 - [x] O(n^2) gravity simulation
 - [x] O(n^2) isothermal SPH pressure forces
-- [ ] Adiabatic SPH
 - [ ] Well-separated tree construction
 - [ ] O(n*k) SPH using neighbors from tree
 - [ ] O(n) gravity using first-order almost-FMM
 - [ ] Higher-order FMM gravity
-- [ ] Initial conditions generator
 
 ## Program feature TODOs
+- [x] 2D projection camera
+- [x] Control attitude
+- [ ] Zoom and scale indicator
+- [ ] Attitude indicator
+- [ ] 3D camera
 - [ ] Command line simulation configuration
 - [ ] Capture video file
-- [x] 2D projection camera
-- [ ] 3D camera
-- [ ] Attitude indicator
-- [ ] Camera movement control
 - [ ] Pause/unpause simulation
 - [ ] Toggleable: view different fields
 
-## Components
-- `Vector3` is used fot all linear algebra
-- `Particle`: Base-bones struct for a particle used in simulation. All forces acting upon it are defined in specific simulations.
-- `Simulation`: Updates the particles according to a step function. Defines the forces in the simulation
-- `Camera`: Reads the simulation and writes a representation to a screen buffer
-- `Observer`: Provides stats on the simulation and prints these to the terminal
-
-## Simulation methods
-- Simple quadratic-gravity-only: Single-threaded and multithreaded through rayon
-- Gravity can be made O(nlogn) and O(n) through FMM
-- SPH will provide pressure-forces and viscosity
-- This can be integrated by using the tree code to find the closest neighbors
-- Should we care about magnetism and/or radiative transfer?
+## Complexity overview
+- `O(n)` statistics and rendering
+- `O(n log n)` tree construction (perhaps sped up through tree reuse?)
+- `O(n)` gravity (also dependent on precision)
+- `O(kn)` SPH: pressure, viscosity, thermal energy
