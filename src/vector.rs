@@ -73,6 +73,9 @@ impl Vector3 {
             + angle.sin() * self_orthogonal_rotated90
             + self_parallel_axis
     }
+    pub fn rotate(&mut self, axis: Vector3, angle: Float) {
+        self.items = self.rotated(axis, angle).items;
+    }
 }
 
 impl std::iter::Sum<Vector3> for Vector3 {

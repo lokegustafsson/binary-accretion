@@ -39,7 +39,7 @@ impl Camera {
         }
     }
 
-    pub fn turn(
+    pub fn take_input(
         &mut self,
         current_fps: f64,
         left: bool,
@@ -48,30 +48,33 @@ impl Camera {
         down: bool,
         clockwise: bool,
         counterclockwise: bool,
+        zoom_in: bool,
+        zoom_out: bool,
     ) {
-        let turn_angle = TWO_PI / current_fps / SECONDS_PER_REVOLUTION;
+        let angle = TWO_PI / current_fps / 3.0;
         if left != right {
-            self.horizontal = self
-                .horizontal
-                .rotated(self.vertical, if right { turn_angle } else { -turn_angle });
+            self.horizontal
+                .rotate(self.vertical, if right { angle } else { -angle });
         }
         if up != down {
-            self.vertical = self
-                .vertical
-                .rotated(self.horizontal, if up { turn_angle } else { -turn_angle });
+            self.vertical
+                .rotate(self.horizontal, if up { angle } else { -angle });
         }
         if clockwise != counterclockwise {
             let depth = self.horizontal.cross(self.vertical);
-            self.horizontal = self
-                .horizontal
-                .rotated(depth, if clockwise { turn_angle } else { -turn_angle });
-            self.vertical = self
-                .vertical
-                .rotated(depth, if clockwise { turn_angle } else { -turn_angle });
+            self.horizontal
+                .rotate(depth, if counterclockwise { angle } else { -angle });
+            self.vertical
+                .rotate(depth, if counterclockwise { angle } else { -angle });
         }
         // Gram-Schmidt, making the vectors orthogonal again after floating point imprecision
         self.vertical = self.vertical - self.horizontal.dot(self.vertical) * self.horizontal;
         self.vertical = self.vertical.normalized();
         self.horizontal = self.horizontal.normalized();
+
+        if zoom_in != zoom_out {
+            self.horizontal_length *= if zoom_out { 1.05 } else { 1.0 / 1.05 };
+            self.vertical_length *= if zoom_out { 1.05 } else { 1.0 / 1.05 };
+        }
     }
 }

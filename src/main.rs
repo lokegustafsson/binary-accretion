@@ -39,7 +39,7 @@ pub fn main() {
     while window.is_open() {
         // Simulation step and display
         simulation.step(DELTA_T);
-        camera.turn(
+        camera.take_input(
             (1.0 / seconds_per_tick) as f64,
             window.is_key_down(Key::A),
             window.is_key_down(Key::D),
@@ -47,6 +47,8 @@ pub fn main() {
             window.is_key_down(Key::S),
             window.is_key_down(Key::Q),
             window.is_key_down(Key::E),
+            window.is_key_down(Key::X),
+            window.is_key_down(Key::Z),
         );
         camera.view(&mut buffer, WIDTH, HEIGHT, simulation.particles());
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
