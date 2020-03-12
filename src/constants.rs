@@ -12,7 +12,7 @@ pub const RADIUS: Float = 1e16; // About one light year
 pub const SPEED: Float = 100.0;
 pub const MASS: Float = 2e30; // About one solar mass
 const YEAR: Float = 3e7;
-pub const DELTA_T: Float = 5000.0 * YEAR;
+pub const DELTA_T: Float = 15000.0 * YEAR;
 
 // Mathematical
 pub const PI: Float = std::f64::consts::PI as Float;
