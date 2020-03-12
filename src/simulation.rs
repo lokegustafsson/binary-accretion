@@ -60,7 +60,7 @@ impl Simulation {
     fn recompute_densities_and_smoothing_lengths(&mut self) {
         let lengths: Vec<Float> = self
             .particles
-            .iter()
+            .par_iter()
             .map(|p| p.smoothing_length(&self.particles))
             .collect();
         for i in 0..self.particles.len() {
@@ -69,7 +69,7 @@ impl Simulation {
         // Computing densities depends on having smoothing lengths
         let densities: Vec<Float> = self
             .particles
-            .iter()
+            .par_iter()
             .map(|p| p.density(&self.particles))
             .collect();
         for i in 0..self.particles.len() {
