@@ -1,4 +1,4 @@
-use crate::constants::{SECONDS_PER_REVOLUTION, TWO_PI};
+use crate::constants::TWO_PI;
 use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
 

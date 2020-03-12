@@ -3,7 +3,6 @@ use crate::vector::Float;
 // Program
 pub const WIDTH: usize = 800;
 pub const HEIGHT: usize = 800;
-pub const SECONDS_PER_REVOLUTION: Float = 2.0;
 
 // Simulation
 pub const COUNT: usize = 500;
