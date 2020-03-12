@@ -38,7 +38,7 @@ impl Statistics {
             .map(|particle| particle.mass / particle.density)
             .sum();
 
-        let res = format!("{:.1e}", (total_volume * 3.0 / 4.0 / PI).powf(1.0 / 3.0));
+        let res = format!("{:.0e}", (total_volume * 3.0 / 4.0 / PI).powf(1.0 / 3.0));
         if res != self.formatted_ideal_radius {
             self.formatted_ideal_radius = res.clone();
             Some(res)
