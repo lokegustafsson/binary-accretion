@@ -9,9 +9,15 @@ pub const COUNT: usize = 500;
 pub const NEIGHBORS: usize = 50;
 pub const RADIUS: Float = 1e16; // About one light year
 pub const SPEED: Float = 100.0;
-pub const MASS: Float = 2e30; // About one solar mass
+const MASS: Float = 2e30; // About one solar mass
 const YEAR: Float = 3e7;
 pub const DELTA_T: Float = 15000.0 * YEAR;
+
+// Properties constant between all particles
+const TEMPERATURE: Float = 0.1;
+const MOLAR_MASS: Float = 0.001;
+pub const PRESSURE_FACTOR: Float = GAS_CONSTANT * TEMPERATURE / MOLAR_MASS; // Pressure / density (isothermal simulation)
+pub const PARTICLE_MASS: Float = MASS / COUNT as Float;
 
 // Mathematical
 pub const PI: Float = std::f64::consts::PI as Float;

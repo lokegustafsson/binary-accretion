@@ -1,12 +1,13 @@
 mod camera;
 mod constants;
+mod neighbors;
 mod particle;
 mod simulation;
 mod statistics;
 mod vector;
 
 use crate::camera::Camera;
-use crate::constants::{COUNT, DELTA_T, HEIGHT, MASS, RADIUS, SPEED, WIDTH};
+use crate::constants::{COUNT, DELTA_T, HEIGHT, RADIUS, SPEED, WIDTH};
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
 use minifb::{Key, Window, WindowOptions};
@@ -16,7 +17,7 @@ use std::time::{Duration, Instant};
 
 pub fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
-    let mut simulation = Simulation::new(COUNT, RADIUS, SPEED, MASS);
+    let mut simulation = Simulation::new(COUNT, RADIUS, SPEED);
     let mut stats = Statistics::new();
     let mut camera = Camera::new(
         Vector3::zero(),

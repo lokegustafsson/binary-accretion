@@ -1,4 +1,5 @@
-use crate::constants::TWO_PI;
+use crate::constants::{COUNT, NEIGHBORS, TWO_PI};
+use crate::neighbors::*;
 use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
 use rand;
@@ -10,7 +11,7 @@ pub struct Simulation {
 }
 
 impl Simulation {
-    pub fn new(count: usize, max_radius: Float, speed: Float, total_mass: Float) -> Self {
+    pub fn new(count: usize, max_radius: Float, speed: Float) -> Self {
         let mut rng = rand::thread_rng();
         let mut particle = || {
             let pos_unit = Vector3::from_polar(
@@ -23,66 +24,33 @@ impl Simulation {
             Particle::new(
                 pos_unit * max_radius,
                 pos_unit.rotated(Vector3::unit_x(), TWO_PI / 4.0) * speed,
-                total_mass / count as Float,
-                temperature,
-                molar_mass,
             )
         };
         let particles: Vec<Particle> = (0..count).map(|_| particle()).collect();
-        let mut sim = Simulation { particles };
-        sim.recompute_densities_and_smoothing_lengths();
-        return sim;
+        return Simulation { particles };
     }
     pub fn step(&mut self, dt: Float) {
-        // O(n^2) time derivatives of particle properties
-        let acceleration: Vec<Vector3> = self
-            .particles
-            .par_iter()
-            .map(|particle| {
-                // Acceleration from pressure forces and gravity
-                self.total_gravitational_acceleration(particle)
-                    + particle.pressure_acceleration(&self.particles)
+        let neighbor_indices: Vec<Vec<usize>> = nearest_neighbors(
+            self.particles.iter().map(|particle| particle.pos).collect(),
+            NEIGHBORS,
+        );
+        let surrounding: Vec<Vec<Particle>> = neighbor_indices
+            .into_par_iter()
+            .map(|indices| {
+                indices
+                    .into_iter()
+                    .map(|index| self.particles[index])
+                    .collect()
             })
             .collect();
-        // O(n) particle updates
+        let gravity_field: Vec<Vector3> = self.particles.iter().map(|p| p.pos).collect();
         self.particles
-            .iter_mut()
-            .zip(acceleration)
-            .for_each(|(particle, accel)| particle.update_properties(accel, dt));
-        // O(n^2) densities update
-        self.recompute_densities_and_smoothing_lengths();
+            .par_iter_mut()
+            .zip(0..COUNT)
+            .for_each(|(particle, index)| particle.update(dt, &surrounding[index], &gravity_field));
     }
 
     pub fn particles(&self) -> &[Particle] {
         &self.particles
-    }
-
-    fn recompute_densities_and_smoothing_lengths(&mut self) {
-        let lengths: Vec<Float> = self
-            .particles
-            .par_iter()
-            .map(|p| p.smoothing_length(&self.particles))
-            .collect();
-        for i in 0..self.particles.len() {
-            self.particles[i].smoothing_length = lengths[i];
-        }
-        // Computing densities depends on having smoothing lengths
-        let densities: Vec<Float> = self
-            .particles
-            .par_iter()
-            .map(|p| p.density(&self.particles))
-            .collect();
-        for i in 0..self.particles.len() {
-            self.particles[i].density = densities[i];
-        }
-    }
-
-    fn total_gravitational_acceleration(&self, target: &Particle) -> Vector3 {
-        self.particles()
-            .iter()
-            .filter(|p| (target.pos - p.pos).norm_squared() > 1.0)
-            .fold(Vector3::zero(), |acc, p| {
-                acc + target.gravitational_acceleration_from(p)
-            })
     }
 }
