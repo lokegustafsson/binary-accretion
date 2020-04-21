@@ -19,8 +19,6 @@ impl Simulation {
                 TWO_PI * rng.gen::<Float>(),
                 rng.gen::<Float>(),
             );
-            let temperature = 0.1;
-            let molar_mass = 0.001;
             Particle::new(
                 pos_unit * max_radius,
                 pos_unit.rotated(Vector3::unit_x(), TWO_PI / 4.0) * speed,

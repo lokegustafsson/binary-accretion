@@ -9,7 +9,7 @@ pub const COUNT: usize = 500;
 pub const NEIGHBORS: usize = 50;
 pub const RADIUS: Float = 1e16; // About one light year
 pub const SPEED: Float = 100.0;
-const MASS: Float = 2e30; // About one solar mass
+pub const MASS: Float = 2e30; // About one solar mass
 const YEAR: Float = 3e7;
 pub const DELTA_T: Float = 15000.0 * YEAR;
 

@@ -43,7 +43,7 @@ impl Particle {
             .iter()
             .filter(|pos| (self.pos - **pos).norm_squared() > 1.0)
             .fold(Vector3::zero(), |acc, p| {
-                acc + self.gravitational_acceleration_from(p)
+                acc + self.gravitational_acceleration_from(*p)
             })
     }
 
