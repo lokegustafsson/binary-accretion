@@ -1,31 +1,42 @@
+use crate::constants::{COUNT, NEIGHBORS};
 use crate::vector::{Float, Vector3};
 use ordered_float::NotNan;
 use std::collections::BinaryHeap;
 
-pub fn nearest_neighbors(points: Vec<Vector3>, k: usize) -> Vec<Vec<usize>> {
-    nearest_neighbors_quadratic(points, k)
+pub fn nearest_neighbors(points: &[Vector3; COUNT]) -> Box<[[usize; NEIGHBORS]; COUNT]> {
+    assert!(NEIGHBORS < COUNT);
+    nearest_neighbors_quadratic(points)
 }
 
 // O(n^2 + n k log k) time, O(n k) space
-fn nearest_neighbors_quadratic(points: Vec<Vector3>, k: usize) -> Vec<Vec<usize>> {
-    let n = points.len();
-    let mut neighbors: Vec<BinaryHeap<(NotNan<Float>, usize)>> = vec![BinaryHeap::new(); n];
-    for i in 0..n {
-        for j in 0..n {
+fn nearest_neighbors_quadratic(points: &[Vector3; COUNT]) -> Box<[[usize; NEIGHBORS]; COUNT]> {
+    let mut neighbors = Vec::with_capacity(NEIGHBORS * COUNT);
+    for i in 0..COUNT {
+        let mut surrounding: BinaryHeap<(NotNan<Float>, usize)> = BinaryHeap::new();
+        for j in 0..COUNT {
             if i == j {
                 continue;
             }
             let dist = (points[i] - points[j]).norm_squared();
-            if neighbors[i].len() < k {
-                neighbors[i].push((NotNan::new(dist).unwrap(), j));
-            } else if dist < *neighbors[i].peek().unwrap().0 {
-                neighbors[i].pop();
-                neighbors[i].push((NotNan::new(dist).unwrap(), j));
+            if surrounding.len() < NEIGHBORS {
+                surrounding.push((NotNan::new(dist).unwrap(), j));
+            } else if dist < *surrounding.peek().unwrap().0 {
+                surrounding.pop();
+                surrounding.push((NotNan::new(dist).unwrap(), j));
             }
         }
+        assert_eq!(surrounding.len(), NEIGHBORS);
+        let surrounding: Vec<usize> = surrounding
+            .into_iter()
+            .map(|(_dist, index)| index)
+            .collect();
+        for j in 0..NEIGHBORS {
+            neighbors.push(surrounding[j]);
+        }
     }
-    neighbors
-        .into_iter()
-        .map(|heap| heap.into_iter().map(|pair| pair.1).collect())
-        .collect()
+    unsafe {
+        Box::from_raw(
+            Box::into_raw(neighbors.into_boxed_slice()) as *mut [[usize; NEIGHBORS]; COUNT]
+        )
+    }
 }
