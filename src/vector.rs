@@ -1,33 +1,23 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::slice::{Iter, IterMut};
 
 pub type Float = f64;
 #[derive(Copy, Clone, Debug)]
-pub struct Vector3 {
-    pub items: [Float; 3],
-}
+pub struct Vector3([Float; 3]);
 
 impl Vector3 {
     // Constructors
     pub fn zero() -> Self {
-        Vector3 { items: [0.0; 3] }
+        Vector3([0.0; 3])
     }
     pub fn unit_x() -> Self {
-        Vector3 {
-            items: [1.0, 0.0, 0.0],
-        }
+        Vector3([1.0, 0.0, 0.0])
     }
     pub fn unit_y() -> Self {
-        Vector3 {
-            items: [0.0, 1.0, 0.0],
-        }
+        Vector3([0.0, 1.0, 0.0])
     }
     pub fn unit_z() -> Self {
-        Vector3 {
-            items: [0.0, 0.0, 1.0],
-        }
-    }
-    pub fn from_vec(items: [Float; 3]) -> Self {
-        Vector3 { items }
+        Vector3([0.0, 0.0, 1.0])
     }
     pub fn from_polar(latitude: Float, longitude: Float, magnitude: Float) -> Self {
         // Principal values of input:
@@ -39,20 +29,14 @@ impl Vector3 {
             * magnitude
     }
 
-    // Operations
+    // Operation
     pub fn dot(self, other: Self) -> Float {
-        self.items
-            .iter()
-            .zip(other.items.iter())
-            .map(|(a, b)| (*a) * (*b))
-            .sum()
+        self.iter().zip(other.iter()).map(|(a, b)| a * b).sum()
     }
     pub fn cross(self, other: Self) -> Vector3 {
-        let [a1, a2, a3] = self.items;
-        let [b1, b2, b3] = other.items;
-        Vector3 {
-            items: [a2 * b3 - a3 * b2, a3 * b1 - a1 * b3, a1 * b2 - a2 * b1],
-        }
+        let [a1, a2, a3] = self.0;
+        let [b1, b2, b3] = other.0;
+        Vector3([a2 * b3 - a3 * b2, a3 * b1 - a1 * b3, a1 * b2 - a2 * b1])
     }
     pub fn norm_squared(self) -> Float {
         self.dot(self)
@@ -74,7 +58,33 @@ impl Vector3 {
             + self_parallel_axis
     }
     pub fn rotate(&mut self, axis: Vector3, angle: Float) {
-        self.items = self.rotated(axis, angle).items;
+        *self = self.rotated(axis, angle);
+    }
+    pub fn iter<'a>(&'a self) -> Iter<'a, Float> {
+        self.0.iter()
+    }
+    pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, Float> {
+        self.0.iter_mut()
+    }
+}
+
+// This is bad code - though bug-free it will panic from incorrect usage.
+// This is a necessary evil, as it is to my knowledge currently impossible
+// to implement TryFrom<I: Iterator<_>> due to a conflicting implementation
+// in core. This is very sad.
+impl<I: Iterator<Item = Float>> From<I> for Vector3 {
+    fn from(mut iterator: I) -> Vector3 {
+        let mut result = Vector3::zero();
+        for i in 0..3 {
+            match iterator.next() {
+                None => panic!("Cannot convert iterator of length <3 to Vector3"),
+                Some(val) => result.0[i] = val,
+            }
+        }
+        if iterator.next() != None {
+            panic!("Cannot convert iterator of length >3 to Vector3")
+        }
+        result
     }
 }
 
@@ -86,40 +96,36 @@ impl std::iter::Sum<Vector3> for Vector3 {
 
 impl std::fmt::Display for Vector3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "[{}, {}, {}]",
-            self.items[0], self.items[1], self.items[2]
-        )
+        write!(f, "[{}, {}, {}]", self.0[0], self.0[1], self.0[2])
     }
 }
 
 // region Vector3<N> {AddAssign<Self>, SubAssign<Self>, MulAssign<Float>, DivAssign<Float>} impls
 impl AddAssign for Vector3 {
     fn add_assign(&mut self, other: Self) {
-        for (selfref, val) in self.items.iter_mut().zip(&other.items) {
-            *selfref += *val;
+        for (selfref, val) in self.iter_mut().zip(other.iter()) {
+            *selfref += val;
         }
     }
 }
 impl SubAssign for Vector3 {
     fn sub_assign(&mut self, other: Self) {
-        for (selfref, val) in self.items.iter_mut().zip(&other.items) {
-            *selfref -= *val;
+        for (selfref, val) in self.iter_mut().zip(other.iter()) {
+            *selfref -= val;
         }
     }
 }
 
 impl MulAssign<Float> for Vector3 {
     fn mul_assign(&mut self, scalar: Float) {
-        for item in self.items.iter_mut() {
+        for item in self.iter_mut() {
             *item *= scalar;
         }
     }
 }
 impl DivAssign<Float> for Vector3 {
     fn div_assign(&mut self, scalar: Float) {
-        for item in self.items.iter_mut() {
+        for item in self.iter_mut() {
             *item /= scalar;
         }
     }
