@@ -1,8 +1,9 @@
+use std::iter::FromIterator;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use std::slice::{Iter, IterMut};
 
 pub type Float = f64;
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vector3([Float; 3]);
 
 impl Vector3 {
@@ -66,14 +67,18 @@ impl Vector3 {
     pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, Float> {
         self.0.iter_mut()
     }
+    pub fn items(&self) -> &[Float; 3] {
+        &self.0
+    }
 }
 
 // This is bad code - though bug-free it will panic from incorrect usage.
 // This is a necessary evil, as it is to my knowledge currently impossible
 // to implement TryFrom<I: Iterator<_>> due to a conflicting implementation
 // in core. This is very sad.
-impl<I: Iterator<Item = Float>> From<I> for Vector3 {
-    fn from(mut iterator: I) -> Vector3 {
+impl FromIterator<Float> for Vector3 {
+    fn from_iter<I: IntoIterator<Item = Float>>(iter: I) -> Vector3 {
+        let mut iterator = iter.into_iter();
         let mut result = Vector3::zero();
         for i in 0..3 {
             match iterator.next() {
