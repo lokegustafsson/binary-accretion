@@ -1,44 +1,25 @@
-use crate::constants::{MASS, PI};
-use crate::particle::Particle;
+use crate::constants::{GAS_CONSTANT, MASS, MOLAR_MASS, PARTICLE_MASS};
 use crate::vector::{Float, Vector3};
 
-pub struct Statistics {
-    formatted_movement: String,
-    formatted_ideal_radius: String,
+pub fn observe_movement(velocities: &[Vector3]) -> Vector3 {
+    velocities.iter().map(|&v| v).sum()
 }
-
-impl Statistics {
-    pub fn new() -> Self {
-        Statistics {
-            formatted_movement: String::from(""),
-            formatted_ideal_radius: String::from(""),
-        }
-    }
-
-    pub fn observe_movement(&mut self, particles: &[Particle]) -> Option<String> {
-        let total_movement = particles.iter().map(|p| p.vel).sum::<Vector3>().norm();
-
-        let res = format!("{:.2e}", total_movement);
-        if res != self.formatted_movement {
-            self.formatted_movement = res.clone();
-            Some(res)
-        } else {
-            None
-        }
-    }
-
-    pub fn observe_idealised_radius(&mut self, particles: &[Particle]) -> Option<String> {
-        let total_volume: Float = particles
-            .iter()
-            .map(|particle| MASS / particle.density)
-            .sum();
-
-        let res = format!("{:.0e}", (total_volume * 3.0 / 4.0 / PI).powf(1.0 / 3.0));
-        if res != self.formatted_ideal_radius {
-            self.formatted_ideal_radius = res.clone();
-            Some(res)
-        } else {
-            None
-        }
-    }
+pub fn observe_thermal_energy(energies: &[Float]) -> Float {
+    energies.iter().map(|&e| e).sum()
+}
+pub fn observe_kinetic_energy(velocities: &[Vector3]) -> Float {
+    velocities.iter().map(|&v| v.norm_squared()).sum::<Float>() * PARTICLE_MASS / 2.0
+}
+pub fn observe_average_temperature(energies: &[Float]) -> Float {
+    let energy = observe_thermal_energy(energies);
+    energy * MOLAR_MASS / 1.5 / GAS_CONSTANT / MASS
+}
+pub fn observe_overall_density(densities: &[Float]) -> Float {
+    let count = densities.len() as Float;
+    densities
+        .into_iter()
+        .map(|x| 1.0 / x)
+        .sum::<Float>()
+        .powi(-1)
+        * count
 }

@@ -1,5 +1,4 @@
 use crate::constants::TWO_PI;
-use crate::particle::Particle;
 use crate::vector::{Float, Vector3};
 
 pub struct Camera {
@@ -21,14 +20,14 @@ impl Camera {
         }
     }
 
-    pub fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, particles: &[Particle]) {
+    pub fn view(&self, buffer: &mut Vec<u32>, width: usize, height: usize, positions: &[Vector3]) {
         assert_eq!(buffer.len(), width * height);
         for pixel in buffer.iter_mut() {
             *pixel = 0x000000;
         }
 
-        for particle in particles {
-            let pos = particle.pos - self.pos;
+        for &position in positions {
+            let pos = position - self.pos;
             let x = 0.5 + pos.dot(self.horizontal) / self.horizontal_length;
             let y = 0.5 + pos.dot(self.vertical) / self.vertical_length;
             if 0.0 <= x && x < 1.0 && 0.0 <= y && y < 1.0 {

@@ -61,6 +61,9 @@ impl Vector3 {
     pub fn rotate(&mut self, axis: Vector3, angle: Float) {
         *self = self.rotated(axis, angle);
     }
+    pub fn is_finite(&self) -> bool {
+        self.iter().all(|x| x.is_finite())
+    }
     pub fn iter<'a>(&'a self) -> Iter<'a, Float> {
         self.0.iter()
     }

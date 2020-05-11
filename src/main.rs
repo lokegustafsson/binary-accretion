@@ -7,18 +7,17 @@ mod statistics;
 mod vector;
 
 use crate::camera::Camera;
-use crate::constants::{DELTA_T, HEIGHT, RADIUS, SPEED, WIDTH};
+use crate::constants::{BACKGROUND_PRESSURE, DELTA_T, HEIGHT, MASS, RADIUS, SPEED, WIDTH, YEAR};
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
 use minifb::{Key, Window, WindowOptions};
-use statistics::Statistics;
+
 use std::cmp;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
     let mut simulation = Simulation::new(RADIUS, SPEED);
-    let mut stats = Statistics::new();
     let mut camera = Camera::new(
         Vector3::zero(),
         WIDTH as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
@@ -32,14 +31,13 @@ pub fn main() {
 
     window.limit_update_rate(None);
 
-    let mut elapsed_next_print = Duration::from_secs(1);
-    let time_start = Instant::now();
     let mut last_time = Instant::now();
     let mut seconds_per_tick = 0.0;
+    let mut tick = 0;
 
     while window.is_open() {
         // Simulation step and display
-        simulation.step(DELTA_T);
+        let densities = simulation.step();
         camera.take_input(
             (1.0 / seconds_per_tick) as f64,
             window.is_key_down(Key::A),
@@ -51,30 +49,44 @@ pub fn main() {
             window.is_key_down(Key::X),
             window.is_key_down(Key::Z),
         );
-        camera.view(&mut buffer, WIDTH, HEIGHT, simulation.particles());
+        camera.view(&mut buffer, WIDTH, HEIGHT, simulation.positions());
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
 
-        // Observables
-        if let Some(movement) = stats.observe_movement(simulation.particles()) {
-            println!("Movement: {}", movement);
-        }
-        if let Some(radius) = stats.observe_idealised_radius(simulation.particles()) {
+        // Statistics
+        let now = Instant::now();
+        seconds_per_tick =
+            0.9 * seconds_per_tick + 0.1 * now.duration_since(last_time).as_secs_f64();
+        last_time = now;
+
+        if tick % 100 == 0 {
+            let movement = statistics::observe_movement(simulation.velocities());
+            let kinetic_energy = statistics::observe_kinetic_energy(simulation.velocities());
+            let thermal_energy = statistics::observe_thermal_energy(simulation.thermal_energies());
+            let density = statistics::observe_overall_density(&*densities);
+            let temp = statistics::observe_average_temperature(simulation.thermal_energies());
+            let pressure = density * thermal_energy / MASS / 1.5;
+
+            if tick != 0 {
+                println!("\x1B[6F");
+            }
             println!(
-                "Idealised radius: {} (Initial actual: {:e})",
-                radius, RADIUS
+                "Ticks per second: {}. Years elapsed: {}",
+                seconds_per_tick.powi(-1) as u32,
+                ((tick + 1) as f64 * DELTA_T / YEAR) as usize
+            );
+            println!("Momentum per unit mass: {}", movement);
+            println!(
+                "Non-potential energy: {:.3e}, Kinetic: {:.3e}, Thermal: {:.3e}",
+                kinetic_energy + thermal_energy,
+                kinetic_energy,
+                thermal_energy
+            );
+            println!("Average temperature: {}", temp);
+            println!(
+                "Average pressure: {:.3e} (Background: {:.3e})",
+                pressure, BACKGROUND_PRESSURE
             );
         }
-
-        // Looping meta stuff
-        {
-            let now = Instant::now();
-            seconds_per_tick =
-                (9.0 * seconds_per_tick + now.duration_since(last_time).as_secs_f64()) / 10.0;
-            if now.duration_since(time_start) > elapsed_next_print {
-                elapsed_next_print *= 2;
-                println!("Ticks per second: {}", seconds_per_tick.powi(-1) as u32);
-            }
-            last_time = now;
-        }
+        tick += 1;
     }
 }

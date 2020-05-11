@@ -1,66 +1,157 @@
-use crate::constants::{COUNT, NEIGHBORS, TWO_PI};
+use crate::constants::{
+    COUNT, DELTA_T, ENABLE_GAS_DYNAMICS, ENABLE_GRAVITY, INITIAL_THERMAL_ENERGY, TWO_PI,
+    VELOCITY_AVERAGING,
+};
 use crate::neighbors::*;
-use crate::particle::Particle;
+use crate::particle;
 use crate::vector::{Float, Vector3};
 use rand;
 use rand::Rng;
 use rayon::prelude::*;
 
 pub struct Simulation {
-    particles: Box<[Particle; COUNT]>,
+    positions: Box<[Vector3; COUNT]>,
+    velocities: Box<[Vector3; COUNT]>,
+    thermal_energies: Box<[Float; COUNT]>,
 }
 
 impl Simulation {
     pub fn new(max_radius: Float, speed: Float) -> Self {
         let mut rng = rand::thread_rng();
-        let vec: Vec<Particle> = (0..COUNT)
-            .map(|_| {
-                let pos_unit = Vector3::from_polar(
-                    TWO_PI * rng.gen::<Float>(),
-                    TWO_PI * rng.gen::<Float>(),
-                    rng.gen::<Float>(),
-                );
-                Particle::new(
-                    pos_unit * max_radius,
-                    pos_unit.rotated(Vector3::unit_x(), TWO_PI / 4.0) * speed,
+        let mut positions = Vec::with_capacity(COUNT);
+        let mut velocities = Vec::with_capacity(COUNT);
+        for _ in 0..COUNT {
+            let pos_unit = Vector3::from_polar(
+                TWO_PI * rng.gen::<Float>(),
+                TWO_PI * rng.gen::<Float>(),
+                rng.gen::<Float>(),
+            );
+            positions.push(pos_unit * max_radius);
+            velocities.push(pos_unit.rotated(Vector3::unit_z(), TWO_PI / 4.0) * speed);
+        }
+
+        Simulation {
+            positions: unsafe {
+                Box::from_raw(Box::into_raw(positions.into_boxed_slice()) as *mut [Vector3; COUNT])
+            },
+            velocities: unsafe {
+                Box::from_raw(Box::into_raw(velocities.into_boxed_slice()) as *mut [Vector3; COUNT])
+            },
+            thermal_energies: Box::new([INITIAL_THERMAL_ENERGY; COUNT]),
+        }
+    }
+    pub fn step(&mut self) -> Vec<Float> {
+        let neighbor_indices = nearest_neighbors(&self.positions);
+        // Get smoothing lengths
+        let surround_pos: Vec<Vec<Vector3>> = neighbor_indices
+            .iter()
+            .map(|indices| indices.iter().map(|&idx| self.positions[idx]).collect())
+            .collect();
+        let smoothing_lengths: Vec<Float> = (0..COUNT)
+            .into_par_iter()
+            .map(|i| particle::smoothing_length(self.positions[i], &*surround_pos[i]))
+            .collect();
+        // Get densities
+        let surround_smooth: Vec<Vec<Float>> = neighbor_indices
+            .iter()
+            .map(|indices| indices.iter().map(|&idx| smoothing_lengths[idx]).collect())
+            .collect();
+        let densities: Vec<Float> = (0..COUNT)
+            .into_par_iter()
+            .map(|i| {
+                particle::density(
+                    self.positions[i],
+                    smoothing_lengths[i],
+                    &*surround_pos[i],
+                    &*surround_smooth[i],
                 )
             })
             .collect();
+        // Update positions and velocities
+        let deltas: Vec<(Vector3, Vector3, Float)> = (0..COUNT)
+            .into_par_iter()
+            .map(|i| {
+                let surround_density: Vec<Float> = neighbor_indices[i]
+                    .iter()
+                    .map(|&idx| densities[idx])
+                    .collect();
+                let surround_energy: Vec<Float> = neighbor_indices[i]
+                    .iter()
+                    .map(|&idx| self.thermal_energies[idx])
+                    .collect();
+                let surround_vel: Vec<Vector3> = neighbor_indices[i]
+                    .iter()
+                    .map(|&idx| self.velocities[idx])
+                    .collect();
+                let accel = if ENABLE_GRAVITY {
+                    particle::gravitational_acceleration(self.positions[i], &*self.positions)
+                } else {
+                    Vector3::zero()
+                } + if ENABLE_GAS_DYNAMICS {
+                    particle::pressure_acceleration(
+                        self.positions[i],
+                        self.thermal_energies[i],
+                        smoothing_lengths[i],
+                        densities[i],
+                        &*surround_pos[i],
+                        &*surround_energy,
+                        &*surround_smooth[i],
+                        &*surround_density,
+                    )
+                } else {
+                    Vector3::zero()
+                };
+                let neigh_vel = particle::neighborhood_velocity(
+                    self.positions[i],
+                    self.velocities[i],
+                    smoothing_lengths[i],
+                    densities[i],
+                    &*surround_pos[i],
+                    &*surround_vel,
+                    &*surround_smooth[i],
+                    &*surround_density,
+                );
 
-        Simulation {
-            particles: unsafe {
-                Box::from_raw(Box::into_raw(vec.into_boxed_slice()) as *mut [Particle; COUNT])
-            },
-        }
-    }
-    pub fn step(&mut self, dt: Float) {
-        let particle_positions: Box<[Vector3; COUNT]> = {
-            let vec: Vec<Vector3> = (0..COUNT).map(|i| self.particles[i].pos).collect();
-            unsafe { Box::from_raw(Box::into_raw(vec.into_boxed_slice()) as *mut [Vector3; COUNT]) }
-        };
-        let neighbor_indices = nearest_neighbors(&particle_positions);
-        let neighbors: Box<[[Particle; NEIGHBORS]; COUNT]> = {
-            let mut vec = Vec::with_capacity(NEIGHBORS * COUNT);
-            for i in 0..COUNT {
-                for j in 0..NEIGHBORS {
-                    let index = neighbor_indices[i][j];
-                    vec.push(self.particles[index]);
-                }
-            }
-            unsafe {
-                Box::from_raw(
-                    Box::into_raw(vec.into_boxed_slice()) as *mut [[Particle; NEIGHBORS]; COUNT]
+                let delta_energy = particle::time_derivative_thermal_energy(
+                    self.positions[i],
+                    self.velocities[i],
+                    self.thermal_energies[i],
+                    smoothing_lengths[i],
+                    densities[i],
+                    &*surround_pos[i],
+                    &*surround_vel,
+                    &*surround_energy,
+                    &*surround_smooth[i],
+                    &*surround_density,
+                );
+                (
+                    self.velocities[i] * DELTA_T
+                        + accel * DELTA_T * DELTA_T / 2.0
+                        + VELOCITY_AVERAGING * neigh_vel,
+                    accel * DELTA_T,
+                    delta_energy,
                 )
-            }
-        };
-        let gravity_field = particle_positions;
-        self.particles
-            .par_iter_mut()
-            .zip(0..COUNT)
-            .for_each(|(particle, index)| particle.update(dt, &neighbors[index], &*gravity_field));
+            })
+            .collect();
+        for i in 0..COUNT {
+            self.positions[i] += deltas[i].0;
+            self.velocities[i] += deltas[i].1;
+            self.thermal_energies[i] += deltas[i].2;
+        }
+        assert!(self.positions.iter().all(|p| p.is_finite()));
+        assert!(self.velocities.iter().all(|p| p.is_finite()));
+        assert!(self.thermal_energies.iter().all(|p| p.is_sign_positive()));
+        densities
     }
 
-    pub fn particles(&self) -> &[Particle] {
-        &*self.particles
+    pub fn positions(&self) -> &[Vector3] {
+        &*self.positions
+    }
+
+    pub fn velocities(&self) -> &[Vector3] {
+        &*self.velocities
+    }
+    pub fn thermal_energies(&self) -> &[Float] {
+        &*self.thermal_energies
     }
 }
