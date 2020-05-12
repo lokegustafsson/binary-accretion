@@ -1,0 +1,27 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+    \item Gravity can be computed using mesh methods and tree methods.
+    \item SPH requires a tree to find a particle's neighbors.
+    \item We might as well use tree-based gravity.
+    \item This means we need to construct a tree in $O(n)$
+    \item We prefer mesh-independent trees for numerical reasons.
+    \item Let's use binary hierarchical clustering!
+    \item Possible in $O(n\log n)$ through the nearest-neighbor chain algorithm combined with finding nearest neighbors in $O(\log n)$
+    \item The nearest-neighbor chain algorithm requires insertions into our find-neighbors data structure
+    \item Let's use a R*-tree!
+\end{itemize}
+Actually let's not, because my tree-gravity is really dumb and causes numerical artifacts
+\begin{itemize}
+    \item Let's use FMM for gravity and Vaydia's algorithm for SPH!
+    \item (Read my bookmark: "life-saving paper")
+\end{itemize}
+
+\subsection{Cluster dissimilarity}
+Computing gravity through FMM in a binary space partitioning tree introduces errors compared to naive $O(n^2)$ gravity. We want to design our algorithm to minimize this errors, in this case through choosing the correct cluster distance function.
+
+The function should be equivalent to
+
+\end{document}

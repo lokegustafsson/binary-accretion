@@ -1,4 +1,3 @@
-% !TEX root = ../main.tex
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
@@ -47,7 +46,7 @@ The density field is particularly important due to the particles having known ma
     A_S(\bm{r}) = \sum_{b} \frac{m_b}{\rho(\bm{r_b})} A(\bm{r_b}) W(\bm{r} - \bm{r_b}, h)
 \end{equation}
 
-additionally giving us the density interpolant for free
+which also gives us the density interpolant
 
 \begin{equation}
     \rho_S(\bm{r}) = \sum_{b} \frac{m_b}{\rho(\bm{r_b})} \rho(\bm{r_b}) W(\bm{r} - \bm{r_b}, h) = \sum_{b} m_b W(\bm{r} - \bm{r_b}, h)
@@ -127,6 +126,7 @@ Giving us the pressure at a particle
     P_a = \frac{2 E_a}{3 m_a} \rho_a = \tau_a \rho_a
 \end{equation}
 
-The pressure factor $\tau_a = \frac{2E_a}{3m_a}$ is constant since no conduction is modelled.
+The pressure factor $\tau_a = \frac{2E_a}{3m_a}$ is constant in this paper's
+isothermal simulation.
 
 \end{document}

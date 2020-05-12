@@ -18,8 +18,8 @@
 \newcommand{\subtitle}[1]{\def\@subtitle{#1}}
 \newcommand{\supervisor}[1]{\def\@supervisor{#1}}
 \makeatother
-\title{Numerical methods for astrophysics}
-\subtitle{Smoothed-particle hydrodynamics and the fast multipole method}
+\title{Simulating gas with self-gravitational interaction using smoothed-particle hydrodynamics}
+\subtitle{}
 \author{Loke Gustafsson}
 \supervisor{Mats Gustafsson}
 \date{\today}
@@ -45,14 +45,17 @@
     \subfile{introduction.tex}
 
 \chapter{Theory}
+    \section{Gravity}
+    \subfile{theory/gravity.tex}
+
+    \section{Ideal gas}
+    \subfile{theory/ideal_gas.tex}
+
     \section{Smoothed-particle Hydrodynamics}
     \subfile{theory/smoothed_particle_hydrodynamics.tex}
 
-    \section{N-body simulation}
-    \subfile{theory/n-body_simulation.tex}
-
-    \section{Spatial partitioning}
-    \subfile{theory/spatial_partitioning.tex}
+    \section{Computing particle neighborhoods}
+    \subfile{theory/neighborhoods.tex}
 
 \chapter{Method}
     \subfile{method.tex}
