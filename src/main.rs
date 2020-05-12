@@ -7,7 +7,7 @@ mod statistics;
 mod vector;
 
 use crate::camera::Camera;
-use crate::constants::{BACKGROUND_PRESSURE, DELTA_T, HEIGHT, MASS, RADIUS, SPEED, WIDTH, YEAR};
+use crate::constants::{BACKGROUND_PRESSURE, DELTA_T, HEIGHT, RADIUS, SPEED, WIDTH, YEAR};
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
 use minifb::{Key, Window, WindowOptions};
@@ -62,9 +62,10 @@ pub fn main() {
             let movement = statistics::observe_movement(simulation.velocities());
             let kinetic_energy = statistics::observe_kinetic_energy(simulation.velocities());
             let thermal_energy = statistics::observe_thermal_energy(simulation.thermal_energies());
-            let density = statistics::observe_overall_density(&*densities);
+            let potential_energy = statistics::observe_potential_energy(simulation.positions());
             let temp = statistics::observe_average_temperature(simulation.thermal_energies());
-            let pressure = density * thermal_energy / MASS / 1.5;
+            let pressure =
+                statistics::observe_average_pressure(simulation.thermal_energies(), &*densities);
 
             if tick != 0 {
                 println!("\x1B[6F");
@@ -72,16 +73,17 @@ pub fn main() {
             println!(
                 "Ticks per second: {}. Years elapsed: {}",
                 seconds_per_tick.powi(-1) as u32,
-                ((tick + 1) as f64 * DELTA_T / YEAR) as usize
+                (tick as f64 * DELTA_T / YEAR) as usize
             );
-            println!("Momentum per unit mass: {}", movement);
+            println!("Momentum per unit mass: {}          ", movement);
             println!(
-                "Non-potential energy: {:.3e}, Kinetic: {:.3e}, Thermal: {:.3e}",
-                kinetic_energy + thermal_energy,
+                "Total energy: {:.2e}, Potential: {:.2e}, Kinetic: {:.2e}, Thermal: {:.2e} ",
+                potential_energy + kinetic_energy + thermal_energy,
+                potential_energy,
                 kinetic_energy,
                 thermal_energy
             );
-            println!("Average temperature: {}", temp);
+            println!("Average temperature: {:.3e}", temp);
             println!(
                 "Average pressure: {:.3e} (Background: {:.3e})",
                 pressure, BACKGROUND_PRESSURE

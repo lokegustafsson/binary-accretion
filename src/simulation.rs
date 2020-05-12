@@ -29,6 +29,11 @@ impl Simulation {
             positions.push(pos_unit * max_radius);
             velocities.push(pos_unit.rotated(Vector3::unit_z(), TWO_PI / 4.0) * speed);
         }
+        let average_movement: Vector3 =
+            velocities.iter().map(|&p| p).sum::<Vector3>() / COUNT as f64;
+        for v in velocities.iter_mut() {
+            *v -= average_movement;
+        }
 
         Simulation {
             positions: unsafe {
@@ -44,7 +49,7 @@ impl Simulation {
         let neighbor_indices = nearest_neighbors(&self.positions);
         // Get smoothing lengths
         let surround_pos: Vec<Vec<Vector3>> = neighbor_indices
-            .iter()
+            .par_iter()
             .map(|indices| indices.iter().map(|&idx| self.positions[idx]).collect())
             .collect();
         let smoothing_lengths: Vec<Float> = (0..COUNT)
@@ -53,7 +58,7 @@ impl Simulation {
             .collect();
         // Get densities
         let surround_smooth: Vec<Vec<Float>> = neighbor_indices
-            .iter()
+            .par_iter()
             .map(|indices| indices.iter().map(|&idx| smoothing_lengths[idx]).collect())
             .collect();
         let densities: Vec<Float> = (0..COUNT)
@@ -138,9 +143,17 @@ impl Simulation {
             self.velocities[i] += deltas[i].1;
             self.thermal_energies[i] += deltas[i].2;
         }
+        // Translate to place center of mass at origo
+        let center_of_mass: Vector3 =
+            self.positions.iter().map(|&p| p).sum::<Vector3>() / COUNT as f64;
+        for p in self.positions.iter_mut() {
+            *p -= center_of_mass;
+        }
+        // Assert valid floats
         assert!(self.positions.iter().all(|p| p.is_finite()));
         assert!(self.velocities.iter().all(|p| p.is_finite()));
         assert!(self.thermal_energies.iter().all(|p| p.is_sign_positive()));
+        // Return densities to aid computing statistics
         densities
     }
 

@@ -5,7 +5,7 @@ pub const WIDTH: usize = 800;
 pub const HEIGHT: usize = 800;
 
 // Simulation
-pub const COUNT: usize = 1000;
+pub const COUNT: usize = 2000;
 pub const NEIGHBORS: usize = 30;
 pub const ENABLE_GRAVITY: bool = true;
 pub const ENABLE_GAS_DYNAMICS: bool = true;
