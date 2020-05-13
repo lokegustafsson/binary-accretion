@@ -7,7 +7,9 @@ mod statistics;
 mod vector;
 
 use crate::camera::Camera;
-use crate::constants::{BACKGROUND_PRESSURE, DELTA_T, HEIGHT, RADIUS, SPEED, WIDTH, YEAR};
+use crate::constants::{
+    COUNT, DELTA_T, HEIGHT, INITIAL_THERMAL_ENERGY, RADIUS, SPEED, TWO_PI, WIDTH, YEAR,
+};
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
 use minifb::{Key, Window, WindowOptions};
@@ -66,6 +68,8 @@ pub fn main() {
             let temp = statistics::observe_average_temperature(simulation.thermal_energies());
             let pressure =
                 statistics::observe_average_pressure(simulation.thermal_energies(), &*densities);
+            let initial_pressure =
+                INITIAL_THERMAL_ENERGY * COUNT as Float / TWO_PI / RADIUS.powi(3);
 
             if tick != 0 {
                 println!("\x1B[6F");
@@ -85,8 +89,8 @@ pub fn main() {
             );
             println!("Average temperature: {:.3e}", temp);
             println!(
-                "Average pressure: {:.3e} (Background: {:.3e})",
-                pressure, BACKGROUND_PRESSURE
+                "Average pressure: {:.3e} (Initial: {:.1e})",
+                pressure, initial_pressure
             );
         }
         tick += 1;
