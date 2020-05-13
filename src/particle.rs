@@ -136,7 +136,7 @@ fn grad_pressure(
 fn kernel(self_pos: Vector3, self_smooth: Float, other_pos: Vector3, other_smooth: Float) -> Float {
     let h = (self_smooth + other_smooth) / 2.0;
     let d2 = (self_pos - other_pos).norm_squared();
-    PI.powf(-0.5) * (-d2 / (h * h)).exp() / (h * h * h)
+    PI.powf(-1.5) * (-d2 / (h * h)).exp() / h.powi(3)
 }
 
 // The gradient of the gaussian kernel
