@@ -26,7 +26,7 @@ impl Vector3 {
         // -PI <= longitude <= PI
         Vector3::unit_x()
             .rotated(Vector3::unit_y(), latitude)
-            .rotated(Vector3::unit_z(), longitude)
+            .rotated(Vector3::unit_x(), longitude)
             * magnitude
     }
 

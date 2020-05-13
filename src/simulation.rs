@@ -22,7 +22,7 @@ impl Simulation {
         let mut velocities = Vec::with_capacity(COUNT);
         for _ in 0..COUNT {
             let pos_unit = Vector3::from_polar(
-                TWO_PI * rng.gen::<Float>(),
+                (2.0 * rng.gen::<Float>() - 1.0).acos(),
                 TWO_PI * rng.gen::<Float>(),
                 rng.gen::<Float>(),
             );
