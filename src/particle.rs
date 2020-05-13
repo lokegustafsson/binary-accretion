@@ -69,13 +69,14 @@ pub fn time_derivative_thermal_energy(
     (0..NEIGHBORS)
         .into_iter()
         .map(|i| {
-            (self_energy / self_density + surround_energy[i] / surround_density[i])
+            (pressure(self_energy, self_density) / self_density.powi(2)
+                + pressure(surround_energy[i], surround_density[i]) / surround_density[i].powi(2))
                 * grad_kernel(self_pos, self_smooth, surround_pos[i], surround_smooth[i])
-                    .dot(surround_vel[i] - self_vel)
+                    .dot(self_vel - surround_vel[i])
         })
         .sum::<Float>()
-        * PARTICLE_MASS
-        / 3.0
+        * PARTICLE_MASS.powi(2)
+        / 2.0
 }
 
 pub fn neighborhood_velocity(
@@ -91,7 +92,7 @@ pub fn neighborhood_velocity(
     (0..NEIGHBORS)
         .into_iter()
         .map(|i| {
-            (self_vel - surround_vel[i]) / (self_density + surround_density[i])
+            (surround_vel[i] - self_vel) / (self_density + surround_density[i])
                 * kernel(self_pos, self_smooth, surround_pos[i], surround_smooth[i])
         })
         .sum::<Vector3>()
