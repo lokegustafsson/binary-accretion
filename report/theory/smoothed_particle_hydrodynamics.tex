@@ -56,7 +56,7 @@ The density field is particularly important due to the particles having known ma
 summation interpolant using the volumes of the particles. Writing the volume $V_b$ as
 $\dfrac{m_b}{\rho(\bm{r_b})}$ allows us to talk about the density rather than the volume:
 
-\begin{equation} \label{eq:2.5}
+\begin{equation} \label{eq:field interpolant}
     A_S(\bm{r})
     = \sum_{b} \frac{m_b}{\rho(\bm{r_b})} A(\bm{r_b}) W(\bm{r} - \bm{r_b}, h)
 \end{equation}
@@ -80,9 +80,9 @@ curls within the SPH framework. More specifically, we need a way to compute
 $\nabla A$, $\nabla\cdot\bm{F}$ and $\nabla\times\bm{F}$, where $A$ and $\bm{F}$ are arbitrary
 scalar and vector fields respectively.
 
-Using (\ref{eq:2.5}) we can write $(\nabla A)_a$ as
+Using (\ref{eq:field interpolant}) we can write $(\nabla A)_a$ as
 
-\begin{equation} \label{eq:2.7}
+\begin{equation} \label{eq:naive gradient}
     (\nabla A)_a
     = (\nabla_a A)_a
     = \sum_b \frac{m_b}{\rho_b} A_b \nabla_a W_{ab}
@@ -106,7 +106,7 @@ the computation simpler:
 
 $\nabla A$ is then computed as
 
-\begin{equation} \label{eq:2.9}
+\begin{equation} \label{eq:smart gradient}
     \rho_a (\nabla A)_a
     = \nabla_a (\rho A) - (\nabla\rho)_a A_a
     = \sum_b m_b (A_b - A_a) \nabla_a W_{ab}
@@ -115,7 +115,7 @@ $\nabla A$ is then computed as
 Similarly using the product rules of the divergence and curl and simplifying gives us the two other
 operators:
 
-\begin{equation}
+\begin{equation} \label{eq:divergence interpolant}
     \rho_a (\nabla\cdot\bm{F})_a
     = \sum_b m_b (\bm{F}_b - \bm{F}_a) \cdot \nabla_a W_{ab}
 \end{equation}
@@ -126,24 +126,25 @@ operators:
 \end{equation}
 
 However, this is not the entire story as SPH allows most fields to be interpolated in different
-ways: recall that we have already expressed $\nabla A$ in two different ways with (\ref{eq:2.5}) and
-(\ref{eq:2.9}).
+ways: recall that we have already expressed $\nabla A$ in two different ways with
+(\ref{eq:naive gradient}) and
+(\ref{eq:smart gradient}).
 
 It is quite desireable for our equations to conserve momentum, and so, since momentum transfer in
 fluids is driven by pressure gradients, an ideal pressure interpolant sums up terms that exactly and
-only changes sign when $a$ and $b$ are flipped. Note that (\ref{eq:2.9}) does not fullfill this
+only changes sign when $a$ and $b$ are flipped. Note that (\ref{eq:smart gradient}) does not fullfill this
 criteria:
 
 \begin{equation}
 \begin{split}
-    (A_b - A_a) \nabla_a W_{ab} = (A_b - A_a) (-2(r_a - r_b) \cdot W_{ab}) \\
-  = (A_a - A_b) \nabla_b W_{ba} = (A_a - A_b) (-2(r_b - r_a) \cdot W_{ba})
+    (A_b - A_a) \nabla_a W_{ab} = (A_b - A_a) (-2(r_b - r_a) \cdot W_{ab}) \\
+  = (A_a - A_b) \nabla_b W_{ba} = (A_a - A_b) (-2(r_a - r_b) \cdot W_{ba})
 \end{split}
 \end{equation}
 
 Which holds since the kernel is a function of only the absolute distance and the smoothing length:
-i.e. $W_{ab} = W(||r_a - r_b||, h_{ab}) = W(||r_b - r_a||, h_{ba}) = W_{ba}$ and we pick a symmetric
-smoothing length.
+i.e. $W_{ab} = W(||r_a - r_b||, h_{ab}) = W(||r_b - r_a||, h_{ba}) = W_{ba}$ and given that we pick
+a symmetric smoothing length.
 
 Monaghan \autocite{monaghan1992} suggests writing
 
@@ -153,12 +154,50 @@ Monaghan \autocite{monaghan1992} suggests writing
 
 giving
 
-\begin{equation}
+\begin{equation} \label{eq:symmetric pressure gradient}
     (\nabla P)_a = \rho_a \sum_b m_b (\frac{P_a}{\rho_b^2} + \frac{P_b}{\rho_a^2}) \nabla_a W_{ab}
 \end{equation}
 
-This is the equation used in this work.
+This is the equation used in this work. Monaghan also suggests rewriting $\frac{du}{dt} = -
+\frac{P}{\rho} \nabla \cdot \bm{v}$, where $u$ is the thermal energy per unit mass, as
 
-WHAT SENSE CAN I MAKE OF MONAGHAN'S THERMAL ENERGY EQUATION?
+\begin{equation} \label{eq:2.19}
+    \frac{du}{dt}
+    = - \nabla \cdot (\frac{P\bm{v}}{\rho}) + \bm{v} \cdot \nabla (\frac{P}{\rho})
+\end{equation}
+
+giving the interpolant
+
+\begin{equation}
+\begin{aligned}
+  & \frac{du_a}{dt}
+  = - \nabla_a (\sum_b m_b \, \frac{P_b}{\rho_b^2} \, \bm{v_b} \, W_{ab})
+  + \bm{v_a} \cdot \nabla_a (\sum_b m_b \, \frac{P_b}{\rho_b^2} \, W_{ab}) \\
+  & = \sum_b m_b \, \frac{P_b}{\rho_b^2} (\bm{v_a} - \bm{v_b}) \cdot \nabla_a W_{ab}
+\end{aligned}
+\end{equation}
+
+This expression is similar to what we would obtain using the divergence interpolation technique from
+(\ref{eq:divergence interpolant}):
+
+\begin{equation}
+    \frac{du_a}{dt}
+    = - \frac{P_a}{\rho_a} (\nabla \cdot \bm{v})_a
+    = - \frac{P_a}{\rho_a^2} \sum_b m_b \, (\bm{v_b} - \bm{v_a}) \cdot \nabla_a W_{ab}
+\end{equation}
+
+Monaghan suggests using the average of the two interpolats, achieving symmetry properties similar to
+those of (\ref{eq:symmetric pressure gradient}):
+
+\begin{equation}
+    \frac{du_a}{dt}
+    = \sum_b m_b \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) (\bm{v_a} - \bm{v_b}) \cdot
+    \nabla_a W_{ab}
+\end{equation}
+
+This combined equation is used in this work. The author wants to point out the importance of
+reflecting on the difference between the two equations: there is no conservation law for thermal
+energy --- nor does this equation conserve it. The symmetry of this equation lies solely in the fact
+that particle $A$ causes the same change the specific internal energy of $B$ as vice versa.
 
 \end{document}
