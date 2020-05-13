@@ -27,7 +27,11 @@ impl Simulation {
                 rng.gen::<Float>(),
             );
             positions.push(pos_unit * max_radius);
-            velocities.push(pos_unit.rotated(Vector3::unit_z(), TWO_PI / 4.0) * speed);
+            velocities.push(
+                (pos_unit - Vector3::unit_z() * Vector3::unit_z().dot(pos_unit))
+                    .rotated(Vector3::unit_z(), TWO_PI / 4.0)
+                    * speed,
+            );
         }
         let average_movement: Vector3 =
             velocities.iter().map(|&p| p).sum::<Vector3>() / COUNT as f64;
