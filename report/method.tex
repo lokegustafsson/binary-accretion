@@ -9,4 +9,50 @@
         times.
 \end{itemize}
 
+\section{Equations and interpolants}
+
+\begin{equation}
+    h_{ab} = \frac{h_a + h_b}{2}
+\end{equation}
+
+\begin{equation}
+    W_{ab} = \frac{1}{h_{ab}^3 \, \pi^{\frac{3}{2}}} e^{-(\frac{||\bm{r_a} - \bm{r_b}||}{h_{ab}})^2}
+\end{equation}
+
+\begin{equation}
+    \nabla_a W_{ab} = -2 \frac{\bm{r_a} - \bm{r_b}}{h_{ab}} W_{ab}
+\end{equation}
+
+\begin{equation}
+    \rho_a = \sum_b m \, W_{ab}
+\end{equation}
+
+\begin{equation}
+    P = \frac{2 E \rho}{3 m}
+\end{equation}
+
+\begin{equation}
+    \frac{d\bm{v}}{dt}
+    = -\frac{\nabla P}{\rho} + \bm{g}
+    \hspace{20pt}
+    \hspace{20pt}
+    \frac{d\bm{v_a}}{dt}
+    = \bm{g} - \sum_b m \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) \nabla_a W_{ab}
+\end{equation}
+
+\begin{equation}
+    \frac{dE}{dt}
+    = - \frac{P}{\rho} \nabla \cdot \bm{v}
+    \hspace{20pt}
+    \frac{dE}{dt}
+    = \frac{m_a}{2} \sum_b m \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) (\bm{v_b} - \bm{v_a})
+    \cdot \nabla_a W_{ab}
+\end{equation}
+
+\begin{equation}
+    \frac{d\bm{r_a}}{dt}
+    = \bm{v_a} + \epsilon \sum_b m \, \frac{2 (\bm{v_a} - \bm{v_b})}{\rho_a + \rho_b} \, W_{ab}
+\end{equation}
+
+
 \end{document}
