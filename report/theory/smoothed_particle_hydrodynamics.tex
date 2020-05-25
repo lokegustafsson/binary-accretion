@@ -22,7 +22,7 @@ For a given vector or scalar field $A$ we define the integral interpolant $A_I \
 \end{equation}
 
 where $\bm{r}$ and $\bm{r'}$ are position vectors with units $m$ and $h$ is a scalar ``smoothing
-length'' with units $m$. The (scalar) kernel function $W(\bm{r}, h)$ has units $m^{-3}$ and
+length'' with units $m$. The (scalar) kernel function $W(||\bm{r}||, h)$ has units $m^{-3}$ and
 satisfies
 
 \begin{equation}
@@ -32,10 +32,10 @@ satisfies
 where the integral is over all space and
 
 \begin{equation}
-    \lim_{h\to0} W(||\bm{r}||, h) d\bm{r}
-    = \delta(x)
+    \lim_{h\to0} W(||\bm{r}||, h)
+    = \delta(||\bm{r}||)
     = \begin{cases}
-        +\infty & \text{for } x = 0 \\
+        +\infty & \text{for } ||\bm{r}|| = 0 \\
         0 & \text{otherwise} \end{cases}
 \end{equation}
 
@@ -45,7 +45,7 @@ define the summation interpolant $A_S \approx A_I$ as
 
 \begin{equation}
     A_S(\bm{r})
-    = \sum_{b} V_b A(b) W(||\bm{r} - \bm{r_b}||, h)
+    = \sum_{b} V_b A(\bm{r_b}) W(||\bm{r} - \bm{r_b}||, h)
 \end{equation}
 
 where the sum is over all the SPH particles. The particles each have a position $\bm{r}$, velocity
@@ -72,7 +72,7 @@ which also gives us the density interpolant
 At this point we drop the $I$ and $S$ subscripts for the interpolants as this would be
 unnecessarily verbose and intent will be clear from context. This allows us to shorten
 $A_S(\bm{r_b})$ to $A_b$. We will also write $W(\bm{r_a} - \bm{r_b}, h)$ as $W_{ab}$ and let
-$\nabla_a$ denote the gradient with respect to the space coordinates of particle $a$.
+$\nabla_a$ denote the gradient with respect to the spatial coordinates of particle $a$.
 
 \subsection{Operators}
 In order to solve the differential equations we need a way to compute gradients, divergence and
@@ -84,14 +84,14 @@ Using (\ref{eq:field interpolant}) we can write $(\nabla A)_a$ as
 
 \begin{equation} \label{eq:naive gradient}
     (\nabla A)_a
-    = (\nabla_a A)_a
-    = \sum_b \frac{m_b}{\rho_b} A_b \nabla_a W_{ab}
+    = \nabla_a A_a
+    = \nabla_a \sum_b \frac{m_b}{\rho_b} A_b W_{ab}
     = \sum_b \frac{m_b A_b \nabla_a W_{ab}}{\sum_c m_c W_{bc}}
 \end{equation}
 
 giving us the gradient of any field for which we can compute $A_b$.
 
-However, it turns out \autocite{monaghan1992} that this nested sum decreases precision. Instead, the
+However, it turns out \autocite{sph} that this nested sum decreases precision. Instead, the
 usual approach is to calulate the interpolated $(\nabla(\rho A))_a$ and then retrieve $A$ through
 $\rho\nabla A = \nabla(\rho A) - \nabla\rho A$.
 
@@ -114,12 +114,10 @@ $\nabla A$ is then computed as
 
 Similarly using the product rules of the divergence and curl and simplifying gives us the two other
 operators:
-
 \begin{equation} \label{eq:divergence interpolant}
     \rho_a (\nabla\cdot\bm{F})_a
     = \sum_b m_b (\bm{F}_b - \bm{F}_a) \cdot \nabla_a W_{ab}
 \end{equation}
-
 \begin{equation}
     \rho_a (\nabla\times\bm{F})_a
     = - \sum_b m_b (\bm{F}_b - \bm{F}_a) \times \nabla_a W_{ab}
@@ -134,19 +132,18 @@ It is quite desireable for our equations to conserve momentum, and so, since mom
 fluids is driven by pressure gradients, an ideal pressure interpolant sums up terms that exactly and
 only changes sign when $a$ and $b$ are flipped. Note that (\ref{eq:smart gradient}) does not fullfill this
 criteria:
-
 \begin{equation}
 \begin{split}
-    (A_b - A_a) \nabla_a W_{ab} = (A_b - A_a) (-2(r_b - r_a) \cdot W_{ab}) \\
-  = (A_a - A_b) \nabla_b W_{ba} = (A_a - A_b) (-2(r_a - r_b) \cdot W_{ba})
+    (A_b - A_a) \nabla_a W_{ab} = (A_b - A_a) (-2(\bm{r_b} - \bm{r_a}) \cdot W_{ab}) \\
+    = (A_a - A_b) \nabla_b W_{ba} = (A_a - A_b) (-2(\bm{r_a} - \bm{r_b}) \cdot W_{ba})
 \end{split}
 \end{equation}
 
-Which holds since the kernel is a function of only the absolute distance and the smoothing length:
-i.e. $W_{ab} = W(||r_a - r_b||, h_{ab}) = W(||r_b - r_a||, h_{ba}) = W_{ba}$ and given that we pick
-a symmetric smoothing length.
+Which holds assuming the kernel is a function of only the absolute distance and the smoothing length, that we pick a
+symmetric smoothing length and that $\nabla_a W_{ab} = -2(\bm{r_b} - \bm{r_a}) \, W_{ab}$. The
+kernel function fullfilling these criteria is specifically discussed in the next subsection.
 
-Monaghan \autocite{monaghan1992} suggests writing
+Monaghan \autocite{sph} suggests writing
 
 \begin{equation}
     \frac{\nabla P}{\rho} = \nabla (\frac{P}{\rho}) + \frac{P}{\rho^2} \nabla \rho
@@ -165,9 +162,7 @@ This is the equation used in this work. Monaghan also suggests rewriting $\frac{
     \frac{du}{dt}
     = - \nabla \cdot (\frac{P\bm{v}}{\rho}) + \bm{v} \cdot \nabla (\frac{P}{\rho})
 \end{equation}
-
 giving the interpolant
-
 \begin{equation}
 \begin{aligned}
   & \frac{du_a}{dt}
@@ -191,7 +186,7 @@ those of (\ref{eq:symmetric pressure gradient}):
 
 \begin{equation}
     \frac{du_a}{dt}
-    = \sum_b m_b \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) (\bm{v_a} - \bm{v_b}) \cdot
+    = \frac{1}{2} \sum_b m_b \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) (\bm{v_a} - \bm{v_b}) \cdot
     \nabla_a W_{ab}
 \end{equation}
 
@@ -202,6 +197,68 @@ that particle $A$ causes the same change the specific internal energy of $B$ as 
 
 \subsection{Kernel function}
 
-Todo! Prove the integral and say some things about the gaussian.
+The subsections above assume that the kernel function has the following properties:
+
+\begin{enumerate}
+    \item $W_{ab} = W_{ba} = W(||\bm{r_a} - \bm{r_b}||, h_{ab})$
+    \item $h_{ab} = h_{ba}$
+    \item $W$ and $h$ are scalars with units $m^{-3}$ and $m^{-1}$ respectively.
+    \item ${\displaystyle \lim_{h\to0} W(||\bm{r}||, h) = \delta(||\bm{r}||) }$
+    \item For any $h$, ${\displaystyle \int_{\mathbb{R}^3} \! W(||\bm{r}||, h) \, \mathrm{d} V(\bm{r}) = 1}$
+\end{enumerate}
+
+This work uses the gaussian kernel
+\begin{equation}
+    W(r, h) = \frac{1}{h^3 \, \pi^{\frac{3}{2}}} e^{-(\frac{r}{h})^2}
+\end{equation}
+with a symmetric smoothing length $h_{ab}$ detailed in the next section.
+
+This trivially satisfies the first four requirements, but for the fifth one we
+need to prove
+
+\begin{equation}
+    {\displaystyle \int_{\mathbb{R}^3} \!
+        e^{-(\frac{||\bm{r}||}{h})^2}
+        \, \mathrm{d} V(\bm{r})
+    \stackrel{?}{=} h^3 \pi^\frac{3}{2}}
+\end{equation}
+
+Substituting
+
+\begin{equation}
+    \bm{s} = \frac{\bm{r}}{h} \implies \mathrm{d}V(\bm{r}) = h^3 \mathrm{d}V(\bm{s})
+\end{equation}
+
+gives
+
+\begin{equation}
+    {\displaystyle \int_{\mathbb{R}^3} \!
+        h^3 e^{-||\bm{s}||^2}
+    \, \mathrm{d} V(\bm{s}) }
+\end{equation}
+
+Further substituting to do spherical integration
+
+\begin{equation}
+    \bm{s} =
+    \begin{pmatrix}
+        r \sin \phi \cos \theta \\
+        r \sin \phi \sin \theta \\
+        r \cos \phi
+    \end{pmatrix}
+    \implies \dwrt V(\bm{s}) = (\dwrt r) (r \dwrt \phi) (r \sin \phi \dwrt \theta)
+\end{equation}
+
+Where $0 \le r \le \infty$, $0 \le \phi \le \pi$, $0 \le \theta \le 2\pi$, finally giving
+
+\begin{equation}
+    h^3 \int_0^{2\pi} \! \int_0^\pi \! \sin \phi
+        \int_0^\infty \! r^2 e^{-r^2} \dwrt r
+        \dwrt \phi \dwrt \theta
+    = 2\pi h^3 \int_0^\pi \! \sin \phi \dwrt \phi \int_0^\infty \! r^2 e^{-r^2} \dwrt r
+\end{equation}
+
+The left integral is trivially $2$ while the right one by computer algebra is found to be
+$\frac{\sqrt{\pi}}{4}$, bringing the total to $\pi^\frac{3}{2} h^3$. $\blacksquare$
 
 \end{document}

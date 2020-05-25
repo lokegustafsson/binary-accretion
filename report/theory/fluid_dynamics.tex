@@ -2,9 +2,40 @@
 
 \begin{document}
 
-\begin{itemize}
-    \item Euler's equations!
-    \item Eulerian vs lagrangian description
-\end{itemize}
+The physical interaction within a gas is governed by the conservation of mass, momentum and energy.
+These laws can, however, due to a gas's continous nature not simply be expressed as sums over a
+finite collection of physical objects. Instead, we use fields. The aforementioned conservations laws
+are adapted to continous fluids in the Euler equations: \autocite{wikipedia_euler_equations}
+
+\begin{equation}
+    \frac{D\rho}{Dt}
+    = - \rho \nabla \cdot \mathbf{u}
+\end{equation}
+
+\begin{equation}
+    \frac{D\mathbf{u}}{Dt}
+    = - \frac{\nabla P}{\rho} + \mathbf{g}
+\end{equation}
+
+\begin{equation}
+    \frac{Du}{Dt}
+    = - \frac{P}{\rho} \nabla \cdot \mathbf{u}
+\end{equation}
+
+Where $\rho$, $P$, $u$ are density, pressure and specific internal energy respectively,
+$\mathbf{u}$ is the velocity flow field, $\mathbf{g}$ denotes body accelerations such as gravity
+and magnetism and $\nabla$ is the del operator.
+
+$\frac{Dy}{Dt}$ is the material derivative, capturing both changes within matter and changes due to its
+movement: $\frac{Dy}{Dt} = \frac{\partial y}{\partial t} + \mathbf{u} \cdot \nabla y$. In a
+Lagrangian simulation (such as in smoothed-particle hydrodynamics) this is already accounted for
+through the movement of simulation particles.
+
+The relation between the pressure, density, and specific internal energy can easily be expressed for
+an ideal gas:
+
+\begin{equation}
+    \frac{2E}{3} = nRT = PV \implies P = \frac{2}{3} u \rho
+\end{equation}
 
 \end{document}

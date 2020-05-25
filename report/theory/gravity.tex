@@ -2,7 +2,48 @@
 
 \begin{document}
 
-Newton's law of gravity, potential energy, computing subquadratically, why relativity can be
-ignored.
+Gravity can be described using Newton's law of gravity. In vector form, with a finite number of
+sources:
+
+\begin{equation}
+    \bm{g} = \sum_b \frac{G m_b (\bm{r_b} - \bm{r})}{||\bm{r_b} - \bm{r}||^3}
+\end{equation}
+
+Since the work done by the gravitational field is path-independent we can define a gravitional
+potential field:
+
+\begin{equation}
+    \bm{g} = - \nabla \phi
+\end{equation}
+
+As gravity is an attractive force increasing with smaller distances it makes
+sense to define the potential energy as the work done by bringing the particles from infinity to
+their current positions.
+
+For a single pair of particles this is readily computed:
+
+\begin{equation}
+    \int_{\infty}^{||\bm{r_a} - \bm{r_b}||} \frac{G m_a m_b}{r^2} dr = \frac{-G m_a m_b}{||\bm{r_a} -
+    \bm{r_b}||}
+\end{equation}
+
+As the force is just a sum between all pairs of particles, a system's total potential energy is the sum of the
+potential energy between all pairs of particles, divided by two to avoid double counting.
+
+\begin{equation}
+    \frac{1}{2} \sum_{\substack{a, b \\ a \ne b}} \frac{-G m_a m_b}{|\bm{r_a} - \bm{r_b}|}
+\end{equation}
+
+Newtonian gravity deviates from general relativity at high velocities and high gravitational
+potentials. More precisely, the deviation is small when the dimensionless quantities $(\frac{v}{c})^2$
+and $\frac{\phi}{c^2}$ are both much less than one. \autocite{wikipedia_newtons_law}
+
+These sums can be computed by summing over all the particles. Unlike the interpolants described in
+the next section, the effect of far-away particles is not negligible, making it more difficult to
+compute efficiently. There are many subquadratic methods for the $N$-body problem, all generally
+based on grouping clusters of distant particles into single sources. In particular, the fast
+multipole method (FMM) computes the forces on all particles in $O(N \log (1 / \epsilon) )$, where
+$\epsilon$ is the tolerated relative error. \autocite{shortcourse_fmm} In this work, however, a
+quadratic direct sum is used due to time constraints.
 
 \end{document}

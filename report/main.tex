@@ -7,6 +7,9 @@
 \usepackage{titlesec}
 \usepackage{subfiles}
 \usepackage{csquotes}
+\usepackage{setspace}
+
+\newcommand{\dwrt}{\,\mathrm{d}}
 
 \usepackage[hidelinks]{hyperref}
 \hypersetup{linktoc=all, }
@@ -34,6 +37,7 @@
 
 % Document
 \begin{document}
+\begin{spacing}{1.5}
 
 \subfile{titlepage.tex}
 
@@ -46,14 +50,11 @@
     \subfile{introduction.tex}
 
 \chapter{Theory}
+    \section{Adiabatic, inviscid and compressible flow in an ideal gas}
+    \subfile{theory/fluid_dynamics.tex}
+
     \section{Gravity}
     \subfile{theory/gravity.tex}
-
-    \section{Ideal gas}
-    \subfile{theory/ideal_gas.tex}
-
-    \section{Compressible inviscid flow}
-    \subfile{theory/fluid_dynamics.tex}
 
     \section{Smoothed-particle hydrodynamics}
     \subfile{theory/smoothed_particle_hydrodynamics.tex}
@@ -72,4 +73,5 @@
 
 \printbibliography[heading=bibintoc,title={References}]
 
+\end{spacing}
 \end{document}
