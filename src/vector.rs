@@ -104,7 +104,7 @@ impl std::iter::Sum<Vector3> for Vector3 {
 
 impl std::fmt::Display for Vector3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}, {}, {}]", self.0[0], self.0[1], self.0[2])
+        write!(f, "[{:.2e}, {:.2e}, {:.2e}]", self.0[0], self.0[1], self.0[2])
     }
 }
 
