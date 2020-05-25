@@ -1,6 +1,5 @@
 use crate::constants::{
-    BACKGROUND_PRESSURE, GRAVITATIONAL_CONSTANT, NEIGHBORS, PARTICLE_MASS, PI,
-    SMOOTHING_DIST_FACTOR,
+    GRAVITATIONAL_CONSTANT, NEIGHBORS, PARTICLE_MASS, PI, SMOOTHING_DIST_FACTOR,
 };
 use crate::vector::{Float, Vector3};
 
@@ -127,9 +126,8 @@ fn grad_pressure(
     (0..NEIGHBORS)
         .into_iter()
         .map(|i| {
-            ((pressure(self_energy, self_density) - BACKGROUND_PRESSURE) / self_density.powi(2)
-                + (pressure(surround_energy[i], surround_density[i]) - BACKGROUND_PRESSURE)
-                    / surround_density[i].powi(2))
+            (pressure(self_energy, self_density) / self_density.powi(2)
+                + pressure(surround_energy[i], surround_density[i]) / surround_density[i].powi(2))
                 * grad_kernel(self_pos, self_smooth, surround_pos[i], surround_smooth[i])
         })
         .sum::<Vector3>()

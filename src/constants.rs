@@ -6,8 +6,6 @@ pub const HEIGHT: usize = 800;
 
 // Simulation
 pub const COUNT: usize = 2000;
-pub const NEIGHBORS: usize = 30;
-pub const SMOOTHING_DIST_FACTOR: Float = 3.0;
 pub const RADIUS: Float = 1.0 * LIGHT_YEAR;
 pub const SPEED: Float = 5000.0;
 pub const DELTA_T: Float = 50.0 * YEAR;
@@ -16,8 +14,9 @@ pub const ENABLE_GRAVITY: bool = true;
 pub const MASS: Float = 500.0 * SOLAR_MASS;
 
 pub const ENABLE_GAS_DYNAMICS: bool = true;
+pub const NEIGHBORS: usize = 30;
+pub const SMOOTHING_DIST_FACTOR: Float = 3.0;
 pub const VELOCITY_AVERAGING: Float = 0.1;
-pub const BACKGROUND_PRESSURE: Float = 0.0;
 const INITIAL_TEMPERATURE: Float = 10.0;
 
 // Convenience
