@@ -74,6 +74,7 @@ impl Simulation {
                     &*surround_pos[i],
                     &*surround_smooth[i],
                 )
+                .max(std::f64::EPSILON)
             })
             .collect();
         // Update positions and velocities

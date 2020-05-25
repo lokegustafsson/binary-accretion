@@ -1,12 +1,16 @@
-use crate::constants::{BACKGROUND_PRESSURE, GRAVITATIONAL_CONSTANT, NEIGHBORS, PARTICLE_MASS, PI};
+use crate::constants::{
+    BACKGROUND_PRESSURE, GRAVITATIONAL_CONSTANT, NEIGHBORS, PARTICLE_MASS, PI,
+    SMOOTHING_DIST_FACTOR,
+};
 use crate::vector::{Float, Vector3};
 
 pub fn smoothing_length(self_pos: Vector3, surround_pos: &[Vector3]) -> Float {
     surround_pos
         .iter()
-        .map(|&other_pos| (other_pos - self_pos).norm())
-        .sum::<Float>()
-        / surround_pos.len() as Float
+        .map(|&other_pos| (other_pos - self_pos).norm_squared())
+        .fold(0.0_f64, |a, b| a.max(b))
+        .sqrt()
+        / SMOOTHING_DIST_FACTOR
 }
 
 pub fn density(
@@ -135,9 +139,13 @@ fn grad_pressure(
 
 // The gaussian kernel
 fn kernel(self_pos: Vector3, self_smooth: Float, other_pos: Vector3, other_smooth: Float) -> Float {
-    let h = (self_smooth + other_smooth) / 2.0;
+    let h = self_smooth.min(other_smooth);
     let d2 = (self_pos - other_pos).norm_squared();
-    PI.powf(-1.5) * (-d2 / (h * h)).exp() / h.powi(3)
+    if d2 > (h * SMOOTHING_DIST_FACTOR).powi(2) {
+        0.0
+    } else {
+        PI.powf(-1.5) * (-d2 / (h * h)).exp() / h.powi(3)
+    }
 }
 
 // The gradient of the gaussian kernel
@@ -147,6 +155,11 @@ fn grad_kernel(
     other_pos: Vector3,
     other_smooth: Float,
 ) -> Vector3 {
-    let h = (self_smooth + other_smooth) / 2.0;
-    (other_pos - self_pos) * 2.0 * kernel(self_pos, self_smooth, other_pos, other_smooth) / (h * h)
+    let h = self_smooth.min(other_smooth);
+    let d2 = (self_pos - other_pos).norm_squared();
+    if d2 > (h * SMOOTHING_DIST_FACTOR).powi(2) {
+        Vector3::zero()
+    } else {
+        (other_pos - self_pos) * 2.0 * PI.powf(-1.5) * (-d2 / (h * h)).exp() / h.powi(5)
+    }
 }
