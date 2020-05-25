@@ -3,7 +3,7 @@
 \begin{document}
 \subsection{Introduction}
 Smoothed-particle hydrodynamics (SPH) is a method in computational fluid dynamics used to
-numerically solve a system of differential equations. Insert history.
+numerically solve a system of differential equations. \todo{Briefly retell SPH history}
 
 SPH is a particle-based, Lagrangian method. This confers several advantages over mesh-based,
 Eulerian methods in astrophysical problems such as those studied in this paper:
@@ -13,12 +13,14 @@ Eulerian methods in astrophysical problems such as those studied in this paper:
     \item Adaptive resolutions
 \end{enumerate}
 
+\todo{Explain the advantages in further detail}
+
 \subsection{Fundamentals}
 For a given vector or scalar field $A$ we define the integral interpolant $A_I \approx A$ as
 
 \begin{equation}
     A_I(\bm{r})
-    = \int A(\bm{r}) W(||\bm{r} - \bm{r'}||, h) d\bm{r'}
+    = \int A(\bm{r}) W(||\bm{r} - \bm{r'}||, h) \dwrt V(\bm{r'})
 \end{equation}
 
 where $\bm{r}$ and $\bm{r'}$ are position vectors with units $m$ and $h$ is a scalar ``smoothing
@@ -26,7 +28,7 @@ length'' with units $m$. The (scalar) kernel function $W(||\bm{r}||, h)$ has uni
 satisfies
 
 \begin{equation}
-    \int W(||\bm{r}||, h) d\bm{r} = 1
+    \int W(||\bm{r}||, h) \dwrt V(\bm{r}) = 1
 \end{equation}
 
 where the integral is over all space and
@@ -95,7 +97,7 @@ However, it turns out \autocite{sph} that this nested sum decreases precision. I
 usual approach is to calulate the interpolated $(\nabla(\rho A))_a$ and then retrieve $A$ through
 $\rho\nabla A = \nabla(\rho A) - \nabla\rho A$.
 
-$\rho A$ is a field like any other, and the fact that the density cancels in its interpolant makes
+$\rho A$ is a field like any other, but the fact that the density cancels in its interpolant makes
 the computation simpler:
 
 \begin{equation}
@@ -237,7 +239,7 @@ gives
     \, \mathrm{d} V(\bm{s}) }
 \end{equation}
 
-Further substituting to do spherical integration
+Further substituting to do spherical integration,
 
 \begin{equation}
     \bm{s} =
@@ -249,7 +251,7 @@ Further substituting to do spherical integration
     \implies \dwrt V(\bm{s}) = (\dwrt r) (r \dwrt \phi) (r \sin \phi \dwrt \theta)
 \end{equation}
 
-Where $0 \le r \le \infty$, $0 \le \phi \le \pi$, $0 \le \theta \le 2\pi$, finally giving
+where $0 \le r \le \infty$, $0 \le \phi \le \pi$, and $0 \le \theta \le 2\pi$:
 
 \begin{equation}
     h^3 \int_0^{2\pi} \! \int_0^\pi \! \sin \phi
