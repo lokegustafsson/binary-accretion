@@ -8,7 +8,7 @@ mod vector;
 
 use crate::camera::Camera;
 use crate::constants::{
-    COUNT, DELTA_T, HEIGHT, INITIAL_THERMAL_ENERGY, RADIUS, SPEED, TWO_PI, WIDTH, YEAR,
+    COUNT, DELTA_T, HEIGHT, INITIAL_THERMAL_ENERGY, RADIUS, TWO_PI, WIDTH, YEAR,
 };
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
@@ -19,7 +19,7 @@ use std::time::Instant;
 
 pub fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
-    let mut simulation = Simulation::new(RADIUS, SPEED);
+    let mut simulation = Simulation::new();
     let mut camera = Camera::new(
         Vector3::zero(),
         WIDTH as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,

@@ -1,6 +1,6 @@
 use crate::constants::{
-    COUNT, DELTA_T, ENABLE_GAS_DYNAMICS, ENABLE_GRAVITY, INITIAL_THERMAL_ENERGY, TWO_PI,
-    VELOCITY_AVERAGING,
+    DensityCurve::*, COUNT, DELTA_T, DENSITY_CURVE, ENABLE_GAS_DYNAMICS, ENABLE_GRAVITY,
+    INITIAL_THERMAL_ENERGY, RADIUS, ROTATIONAL_PERIOD, TWO_PI, VELOCITY_AVERAGING,
 };
 use crate::neighbors::*;
 use crate::particle;
@@ -16,7 +16,7 @@ pub struct Simulation {
 }
 
 impl Simulation {
-    pub fn new(max_radius: Float, speed: Float) -> Self {
+    pub fn new() -> Self {
         let mut rng = rand::thread_rng();
         let mut positions = Vec::with_capacity(COUNT);
         let mut velocities = Vec::with_capacity(COUNT);
@@ -24,13 +24,18 @@ impl Simulation {
             let pos_unit = Vector3::from_polar(
                 (2.0 * rng.gen::<Float>() - 1.0).acos(),
                 TWO_PI * rng.gen::<Float>(),
-                rng.gen::<Float>(),
+                match DENSITY_CURVE {
+                    Uniform => rng.gen::<Float>().sqrt(),
+                    InverseQuadratic => rng.gen::<Float>(),
+                },
             );
-            positions.push(pos_unit * max_radius);
+            positions.push(pos_unit * RADIUS);
             velocities.push(
                 (pos_unit - Vector3::unit_z() * Vector3::unit_z().dot(pos_unit))
                     .rotated(Vector3::unit_z(), TWO_PI / 4.0)
-                    * speed,
+                    * TWO_PI
+                    * RADIUS
+                    / ROTATIONAL_PERIOD,
             );
         }
         let average_movement: Vector3 =

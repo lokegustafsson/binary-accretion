@@ -7,7 +7,8 @@ pub const HEIGHT: usize = 800;
 // Simulation
 pub const COUNT: usize = 2000;
 pub const RADIUS: Float = 1.0 * LIGHT_YEAR;
-pub const SPEED: Float = 5000.0;
+pub const ROTATIONAL_PERIOD: Float = 300_000.0 * YEAR;
+pub const DENSITY_CURVE: DensityCurve = DensityCurve::Uniform;
 pub const DELTA_T: Float = 50.0 * YEAR;
 
 pub const ENABLE_GRAVITY: bool = true;
@@ -24,6 +25,10 @@ pub const MOLAR_MASS: Float = 0.001;
 const LIGHT_YEAR: Float = 1e16;
 const SOLAR_MASS: Float = 2e30;
 pub const YEAR: Float = 3e7;
+pub enum DensityCurve {
+    Uniform,
+    InverseQuadratic,
+}
 
 // Derived constants
 pub const PARTICLE_MASS: Float = MASS / COUNT as Float;
