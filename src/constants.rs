@@ -18,6 +18,7 @@ pub const NEIGHBORS: usize = 30;
 pub const SMOOTHING_DIST_FACTOR: Float = 3.0;
 pub const VELOCITY_AVERAGING: Float = 0.1;
 const INITIAL_TEMPERATURE: Float = 10.0;
+pub const MOLAR_MASS: Float = 0.001;
 
 // Convenience
 const LIGHT_YEAR: Float = 1e16;
@@ -25,7 +26,6 @@ const SOLAR_MASS: Float = 2e30;
 pub const YEAR: Float = 3e7;
 
 // Derived constants
-pub const MOLAR_MASS: Float = 0.001;
 pub const PARTICLE_MASS: Float = MASS / COUNT as Float;
 pub const INITIAL_THERMAL_ENERGY: Float =
     PARTICLE_MASS / MOLAR_MASS * GAS_CONSTANT * INITIAL_TEMPERATURE * 1.5;
