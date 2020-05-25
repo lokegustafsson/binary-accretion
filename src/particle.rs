@@ -29,7 +29,7 @@ pub fn density(
 pub fn gravitational_acceleration(self_pos: Vector3, other_pos: &[Vector3]) -> Vector3 {
     other_pos
         .iter()
-        .filter(|&&pos| (self_pos - pos).norm_squared() > 1.0)
+        .filter(|&&pos| self_pos != pos)
         .fold(Vector3::zero(), |acc, &pos| {
             acc + gravitational_acceleration_from(self_pos, pos)
         })
