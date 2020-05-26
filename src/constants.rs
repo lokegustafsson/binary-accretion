@@ -8,7 +8,7 @@ pub const HEIGHT: usize = 800;
 pub const COUNT: usize = 2000;
 pub const RADIUS: Float = 1.0 * LIGHT_YEAR;
 pub const ROTATIONAL_PERIOD: Float = 300_000.0 * YEAR;
-pub const DENSITY_CURVE: DensityCurve = DensityCurve::Uniform;
+pub const DENSITY_CURVE: DensityCurve = DensityCurve::InverseQuadratic;
 pub const DELTA_T: Float = 50.0 * YEAR;
 
 pub const ENABLE_GRAVITY: bool = true;
@@ -27,6 +27,7 @@ const SOLAR_MASS: Float = 2e30;
 pub const YEAR: Float = 3e7;
 pub enum DensityCurve {
     Uniform,
+    InverseLinear,
     InverseQuadratic,
 }
 

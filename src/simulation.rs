@@ -25,7 +25,8 @@ impl Simulation {
                 (2.0 * rng.gen::<Float>() - 1.0).acos(),
                 TWO_PI * rng.gen::<Float>(),
                 match DENSITY_CURVE {
-                    Uniform => rng.gen::<Float>().sqrt(),
+                    Uniform => rng.gen::<Float>().cbrt(),
+                    InverseLinear => rng.gen::<Float>().sqrt(),
                     InverseQuadratic => rng.gen::<Float>(),
                 },
             );
