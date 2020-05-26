@@ -14,19 +14,19 @@ Summing over $b$ where $||\bm{r_a} - \bm{r_b}|| \le \sigma' h_a$ is much easier 
 it allows methods from computational geometry to be applied. It does however not uphold symmetry
 properties --- momentum in particular is not conserved. To fix this we need to choose a $h_{ab}$
 such that $\sigma h_{ab} \le \sigma' h_a$, which in turn requires
-$h_{ab} = \frac{\sigma'}{\sigma} \min(h_a, h_b)$. $\sigma$ is already encapsulated in the choice
-of $h_a$ and can be assumed to equal $\sigma'$. Additionally, to conserve the symmetric properties
+$h_{ab} = \frac{\sigma'}{\sigma} \min(h_a, h_b)$. $\sigma'$ is already encapsulated in the choice
+of $h_a$ and can be assumed to equal $\sigma$. Additionally, to conserve the symmetric properties
 exactly it is not enough for the influence to decay exponentially. Rather, we need $W(r, h) = 0$
-for $r \ge \sigma'h$. This modification is easily made to the kernel function while influencing the
+for $r \ge \sigma h$. This modification is easily made to the kernel function while influencing the
 simulation negligibly. Finally, this can lead to $F_a$ and $G_a$ being zero instead of small but
 non-zero. This causes problems when dividing by density, as $\frac{0}{0}$ is indeterminate. We can
 fix this by setting $\rho_a := max(\rho_a, \epsilon)$ where $\epsilon$ is the smallest positive
 number expressible by the floating-point numbers used.
 
-The set of relevant neighbors ($\left\{ b \mid ||\bm{r_a} - \bm{r_b}|| \le \sigma' h_a \right\}$)
+The set of relevant neighbors ($\left\{ b \mid ||\bm{r_a} - \bm{r_b}|| \le \sigma h_a \right\}$)
 needs to be computed and should have a similar size for all the particles in order to minimize the
 error given the computational power. We solve this by computing all-$m$-nearest-neighbors for a
-constant $m$ and then choosing $h_a = \frac{\max_b ||\bm{r_a} - \bm{r_b}||}{\sigma'}$.
+constant $m$ and then choosing $h_a = \frac{\max_b ||\bm{r_a} - \bm{r_b}||}{\sigma}$.
 \\
 
 \textsc{All-$m$-nearest-neighbors}
