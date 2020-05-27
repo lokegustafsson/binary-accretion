@@ -118,15 +118,15 @@ roughly match the properties of a protostellar nebulae:
 
 \multicolumn{2}{l}{Computational} \\
     \qquad Particle count:                     & $2 \, 000$ \\
-    \qquad $\Delta t$:                         & $1000$ years \\
+    \qquad $\Delta t$:                         & $500$ years \\
 \multicolumn{2}{l}{General initial conditions} \\
     \qquad Initial radius:                     & $10 \, 000$ AU (about $0.15$ light years)\\
-    \qquad Initial rotational period:          & $1$ billion years \\
+    \qquad Initial rotational period:          & $10$ million years \\
     \qquad Initial density curve:              & Uniform \\
 \multicolumn{2}{l}{Gravity} \\
     \qquad Total mass:                         & $1$ solar mass \\
 \multicolumn{2}{l}{SPH} \\
-    \qquad Initial temperature:                & $5$ K \\
+    \qquad Initial temperature:                & $\SI{5}{\kelvin}$ \\
     \qquad Molar mass:                         & $\SI{2.016}{\gram\per\mole}$ (hydrogen gas) \\
     \qquad Neighbor count $|N_i|$:             & $30$ \\
     \qquad Smoothing distance cutoff $\sigma$:        & $2.0$ \\
@@ -134,18 +134,45 @@ roughly match the properties of a protostellar nebulae:
 
 \end{tabular}
 
+\subsection{Without velocity averaging}
+\begin{tabular}{ll}
+\multicolumn{2}{l}{Modifications} \\
+    \qquad Velocity averaging $\epsilon$:      & $0\%$ \\
+\end{tabular}
+\\
 
-\subsection{Velocity averaging}
-\todo{Write!}
+\subsection{Higher density core}
 
-\subsection{Density curves}
-\todo{Write!}
+\begin{tabular}{ll}
+\multicolumn{2}{l}{Modifications} \\
+    \qquad Initial density curve:              & Inverse linear \\
+\end{tabular}
+\\
 
-\subsection{Extremely high initial temperature}
-\todo{Write!}
+\subsection{Very high initial temperature}
+
+\begin{tabular}{ll}
+\multicolumn{2}{l}{Modifications} \\
+\qquad Initial temperature:                    & $\SI{1000}{\kelvin}$ \\
+\end{tabular}
+\\
+
+\subsection{Rotating}
+
+\begin{tabular}{ll}
+\multicolumn{2}{l}{Modifications} \\
+    \qquad Initial rotational period:          & $500 \, 000$ years \\
+\end{tabular}
+\\
 
 \subsection{Rotating, with a dense core}
-\todo{Write!}
+
+\begin{tabular}{ll}
+\multicolumn{2}{l}{Modifications} \\
+    \qquad Initial rotational period:          & $500 \, 000$ years \\
+    \qquad Initial density curve:              & Inverse quadratic \\
+\end{tabular}
+\\
 
 
 \end{document}

@@ -6,10 +6,10 @@ pub const HEIGHT: usize = 800;
 
 // Computational
 pub const COUNT: usize = 2000;
-pub const DELTA_T: Float = 1000.0 * YEAR;
+pub const DELTA_T: Float = 500.0 * YEAR;
 // General initial conditions
 pub const RADIUS: Float = 10_000.0 * AU;
-pub const ROTATIONAL_PERIOD: Float = 1e9 * YEAR;
+pub const ROTATIONAL_PERIOD: Float = 1e7 * YEAR;
 pub const DENSITY_CURVE: DensityCurve = DensityCurve::Uniform;
 // Gravity
 pub const ENABLE_GRAVITY: bool = true;
