@@ -7,9 +7,7 @@ mod statistics;
 mod vector;
 
 use crate::camera::Camera;
-use crate::constants::{
-    COUNT, DELTA_T, HEIGHT, INITIAL_THERMAL_ENERGY, RADIUS, TWO_PI, WIDTH, YEAR,
-};
+use crate::constants::{DELTA_T, HEIGHT, RADIUS, WIDTH, YEAR};
 use crate::simulation::Simulation;
 use crate::vector::{Float, Vector3};
 use minifb::{Key, Window, WindowOptions};
@@ -34,8 +32,10 @@ pub fn main() {
     window.limit_update_rate(None);
 
     let mut last_time = Instant::now();
-    let mut seconds_per_tick = 0.0;
+    let mut seconds_per_tick = 1.0/30.0;
     let mut tick = 0;
+
+    println!("UPS  Years    Move    Energy    Poten   Kinetic  Temp Pressure");
 
     while window.is_open() {
         // Simulation step and display
@@ -68,29 +68,17 @@ pub fn main() {
             let temp = statistics::observe_average_temperature(simulation.thermal_energies());
             let pressure =
                 statistics::observe_average_pressure(simulation.thermal_energies(), &*densities);
-            let initial_pressure =
-                INITIAL_THERMAL_ENERGY * COUNT as Float / TWO_PI / RADIUS.powi(3);
 
-            if tick != 0 {
-                println!("\x1B[6F");
-            }
             println!(
-                "Ticks per second: {}. Years elapsed: {}",
+                "{:3} {:7} {:8.1e} {:8.2e} {:8.2e} {:8.2e} {:5.2} {:8.1e}",
                 seconds_per_tick.powi(-1) as u32,
-                (tick as f64 * DELTA_T / YEAR) as usize
-            );
-            println!("Momentum per unit mass: {}          ", movement);
-            println!(
-                "Total energy: {:.2e}, Potential: {:.2e}, Kinetic: {:.2e}, Thermal: {:.2e} ",
+                (tick as f64 * DELTA_T / YEAR) as usize,
+                movement.norm(),
                 potential_energy + kinetic_energy + thermal_energy,
                 potential_energy,
                 kinetic_energy,
-                thermal_energy
-            );
-            println!("Average temperature: {:.3} ", temp);
-            println!(
-                "Average pressure: {:.3e} (Initial: {:.1e})",
-                pressure, initial_pressure
+                temp,
+                pressure,
             );
         }
         tick += 1;
