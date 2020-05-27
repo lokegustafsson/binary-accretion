@@ -35,7 +35,7 @@ pub fn main() {
     let mut seconds_per_tick = 1.0/30.0;
     let mut tick = 0;
 
-    println!("UPS  Years    Move    Energy    Poten   Kinetic  Temp Pressure");
+    println!("UPS Years    Move    Energy    Poten   Kinetic  Temp Pressure");
 
     while window.is_open() {
         // Simulation step and display
@@ -70,7 +70,7 @@ pub fn main() {
                 statistics::observe_average_pressure(simulation.thermal_energies(), &*densities);
 
             println!(
-                "{:3} {:7} {:8.1e} {:8.2e} {:8.2e} {:8.2e} {:5.2} {:8.1e}",
+                "{:2} {:7} {:8.1e} {:8.2e} {:8.2e} {:8.2e} {:5.2} {:8.1e}",
                 seconds_per_tick.powi(-1) as u32,
                 (tick as f64 * DELTA_T / YEAR) as usize,
                 movement.norm(),
