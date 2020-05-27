@@ -2,17 +2,18 @@
 
 \begin{document}
 
-\begin{itemize}
-    \item Brief description of the code + github link
-    \item Table of physical equations and sph equivalent
-    \item Describe data collected - screenshots \& stats with different configurations after certain
-        times.
-\end{itemize}
+\section{Simulation overview}
 
-\section{Equations and interpolants}
+Let $N_i$ denote the $M$ nearest neighbors of $i$. The following equations fully describe the
+simulation:
+\begin{multicols}{2}
 
 \begin{equation}
-    h_{ab} = \frac{h_a + h_b}{2}
+    h_a = \frac{1}{\sigma} \max_{b \in N_i} ||\bm{r_a} - \bm{r_b}||
+\end{equation}
+
+\begin{equation}
+    h_{ab} = \min(h_a, h_b)
 \end{equation}
 
 \begin{equation}
@@ -20,39 +21,131 @@
 \end{equation}
 
 \begin{equation}
-    \nabla_a W_{ab} = -2 \frac{\bm{r_a} - \bm{r_b}}{h_{ab}} W_{ab}
+    \nabla_a W_{ab} = -2 \frac{\bm{r_a} - \bm{r_b}}{h_{ab}^2} W_{ab}
 \end{equation}
 
 \begin{equation}
-    \rho_a = \sum_b m \, W_{ab}
+    \rho_a = \max \left( \mathtt{\epsilon_{f64}}, \sum_{b \in N_a} m \, W_{ab} \right)
 \end{equation}
 
 \begin{equation}
-    P = \frac{2 \, E \, \rho}{3 \, m}
+    P_a = \frac{2 \, E_a \, \rho_a}{3 \, m}
 \end{equation}
 
 \begin{equation}
-    \frac{d\bm{v}}{dt}
-    = -\frac{\nabla P}{\rho} + \bm{g}
-    \hspace{20pt}
-    \hspace{20pt}
+    \bm{g_a} = \sum_{b \in \{1 \dots n\} \setminus a} G m \frac{\bm{r_b} - \bm{r_a}}{||\bm{r_b} - \bm{r_a}||^3}
+\end{equation}
+
+\begin{equation}
     \frac{d\bm{v_a}}{dt}
-    = \bm{g} - \sum_b m \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) \, \nabla_a W_{ab}
+    = \bm{g} - \sum_{b \in N_a} m \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) \, \nabla_a W_{ab}
 \end{equation}
 
 \begin{equation}
-    \frac{dE}{dt}
-    = - \frac{m \, P}{\rho} \nabla \cdot \bm{v}
-    \hspace{20pt}
-    \frac{dE}{dt}
-    = \frac{m_a}{2} \sum_b m \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) (\bm{v_a} - \bm{v_b})
+    \frac{dE_a}{dt}
+    = \frac{m}{2} \sum_{b \in N_a} m \, (\frac{P_a}{\rho_a^2} + \frac{P_b}{\rho_b^2}) (\bm{v_a} - \bm{v_b})
     \cdot \nabla_a W_{ab}
 \end{equation}
 
 \begin{equation}
     \frac{d\bm{r_a}}{dt}
-    = \bm{v_a} + \epsilon \sum_b m \, \frac{2 (\bm{v_b} - \bm{v_a})}{\rho_a + \rho_b} \, W_{ab}
+    = \bm{v_a} + \epsilon \sum_{b \in N_a} m \, \frac{2 (\bm{v_b} - \bm{v_a})}{\rho_a + \rho_b} \, W_{ab}
 \end{equation}
+
+\end{multicols}
+
+Where $\mathtt{\epsilon_{f64}} = 2^{-1022}$ is used as shorthand for making $\frac{0}{0} = 0$ in
+several interpolants. $G = 6.674 \cdot 10^{-11}$ is the gravitational constant with SI units
+$\SI{}{\meter\cubed\per\kilo\gram\per\second\squared}$.
+
+The dispersion factor $\epsilon$, the spatially constant particle mass $m$, the smoothing length
+cutoff $\sigma$, the initial conditions $\bm{r_a}$, $\bm{v_a}$ and $E_a$, as well as the number of
+particles $n$, the number of neighbors $M$ and the time step $\Delta t$ are all configured on a per simulation basis in the
+program.
+
+The numerical integration uses the following equations:
+\begin{equation}
+  \bm{r_a} := \bm{r_a}
+    + \frac{d\bm{r_a}}{dt} \Delta t
+    + \frac{d\bm{v_a}}{dt} \frac{\Delta t^2}{2}
+\end{equation}
+\begin{equation}
+    \bm{v_a} := \bm{v_a} + \frac{d\bm{v_a}}{dt} \Delta t
+\end{equation}
+\begin{equation}
+    E_a := E_a + \frac{dE_a}{dt} \Delta t
+\end{equation}
+
+
+The code is written in Rust and is available at
+\href{https://github.com/lokegustafsson/binary-accretion}{github.com/lokegustafsson/binary-accretion}.
+
+\subsection{Initial condition generation}
+The particles all have to be given a position, a velocity and a thermal energy. The $n$ particles
+are placed randomly within a sphere of a given radius, with one of the following density profiles:
+
+\begin{itemize}
+    \item Uniform, i.e. $\rho(r) \propto 1$
+    \item Inverse linear, i.e. $\rho(r) \propto \frac{1}{r}$
+    \item Inverse square, i.e. $\rho(r) \propto \frac{1}{r^2}$
+\end{itemize}
+
+The particles are given the required velocity for rigid-body rotation with a set rotational
+period. The particles are all initially given the same temperature, which since they all have the
+same mass and molar mass gives them the same initial thermal energy.
+
+\section{Data collected}
+In addition to visually displaying the particles, the simulation computes and outputs the following:
+\begin{enumerate}
+    \item Simulation iterations (ticks) per second
+    \item Net movement, i.e. total momentum per unit mass
+    \item Total gravitational potential energy
+    \item Total kinetic energy
+    \item Total thermal energy
+    \item Arithmetic mean of particle temperatures
+    \item Arithmetic mean of particle pressures
+\end{enumerate}
+
+\section{Specific simulations run}
+
+\subsection{Reference simulation}
+Having a reference simulation allows us to perform $n+1$ rather than $2n$ simulations to make $n$
+binary comparisons between simulation parameters. The following standard parameters were chosen to
+roughly match the properties of a protostellar nebulae:
+\\
+
+\begin{tabular}{ll}
+
+\multicolumn{2}{l}{Computational} \\
+    \qquad Particle count:                     & $2 \, 000$ \\
+    \qquad $\Delta t$:                         & $1000$ years \\
+\multicolumn{2}{l}{General initial conditions} \\
+    \qquad Initial radius:                     & $10 \, 000$ AU (about $0.15$ light years)\\
+    \qquad Initial rotational period:          & $1$ billion years \\
+    \qquad Initial density curve:              & Uniform \\
+\multicolumn{2}{l}{Gravity} \\
+    \qquad Total mass:                         & $1$ solar mass \\
+\multicolumn{2}{l}{SPH} \\
+    \qquad Initial temperature:                & $5$ K \\
+    \qquad Molar mass:                         & $\SI{2.016}{\gram\per\mole}$ (hydrogen gas) \\
+    \qquad Neighbor count $|N_i|$:             & $30$ \\
+    \qquad Smoothing distance cutoff $\sigma$:        & $2.0$ \\
+    \qquad Velocity averaging $\epsilon$:      & $100\%$ \\
+
+\end{tabular}
+
+
+\subsection{Velocity averaging}
+\todo{Write!}
+
+\subsection{Density curves}
+\todo{Write!}
+
+\subsection{Extremely high initial temperature}
+\todo{Write!}
+
+\subsection{Rotating, with a dense core}
+\todo{Write!}
 
 
 \end{document}
