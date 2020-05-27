@@ -87,7 +87,7 @@ pub fn main() {
                 kinetic_energy,
                 thermal_energy
             );
-            println!("Average temperature: {:.3e}", temp);
+            println!("Average temperature: {:.3} ", temp);
             println!(
                 "Average pressure: {:.3e} (Initial: {:.1e})",
                 pressure, initial_pressure
