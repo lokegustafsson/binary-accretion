@@ -128,7 +128,7 @@ impl Simulation {
                     &*surround_density,
                 );
 
-                let delta_energy = particle::time_derivative_thermal_energy(
+                let derivative_energy = particle::time_derivative_thermal_energy(
                     self.positions[i],
                     self.velocities[i],
                     self.thermal_energies[i],
@@ -145,14 +145,14 @@ impl Simulation {
                         + accel * DELTA_T * DELTA_T / 2.0
                         + VELOCITY_AVERAGING * neigh_vel,
                     accel * DELTA_T,
-                    delta_energy,
+                    derivative_energy * DELTA_T,
                 )
             })
             .collect();
         for i in 0..COUNT {
             self.positions[i] += deltas[i].0;
             self.velocities[i] += deltas[i].1;
-            self.thermal_energies[i] += deltas[i].2;
+            self.thermal_energies[i] = (self.thermal_energies[i] + deltas[i].2).max(0.0);
         }
         // Translate to place center of mass at origo
         let center_of_mass: Vector3 =
