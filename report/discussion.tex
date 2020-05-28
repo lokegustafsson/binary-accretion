@@ -2,4 +2,51 @@
 
 \begin{document}
 
+The results show that:
+\begin{enumerate}
+    \item Momentum is conserved, up to errors induced by limited floating-point precision.
+    \item The sum of gravitational potential, kinetic and thermal energy is not a conserved
+        quantity.
+    \item The average temperature strongly correlates with the average pressure
+    \item The reference parameters lead to pulsation in the gas. The pulsation period is roughly
+        constant over the three expansions and contractions observed in the simulation. The mean
+        temperature in the valleys is roughly constant: $4.48$, $4.62$ and $4.67$, while the peak
+        temperature decreases sharply from $7.57$ to $6.56$ to $5.80$ in the three contractions. No
+        dense core develops.
+    \item A high initial temperature leads to massive expansion. Roughly $30\%$ of the thermal
+        energy is converted to kinetic energy in the first $50 \, 000$ years, and the overwhelming
+        majority of the total acceleration during the simulation occurs in that period.
+        Additionally, visual observation indicates that the initially internal particles during that
+        period are mostly accelerated inwards. This raises questions about how their velocity is
+        redirected.
+    \item The collapse of rotating particles into a flat disk is analogous to the first collapse of
+        the reference simulation. The subsequent expansion then occurs in all directions, but since
+        the rotation has given a head start to expansion in the rotatonal plane the particles expand
+        in a flattened shape.
+    \item Rotational with a dense core is similar to rotational without a dense core. The main
+        difference is that the core can maintain its mass despite the rotation. That the core does
+        not rotate much faster than the initial rotational implies that angular momentum has not
+        been transfered from the initially outer layers. This likely means that very few particles
+        initially in the outer layers end up in the stable core at the end of the simulation.
+\end{enumerate}
+
+That momentum is conserved and that temperature correlates with pressure implies that the simulation
+roughly corresponds to the behavior of a real gas. It is more problematic that no dense core
+develops in the reference simulation or the rotating simulation of uniform density, and that
+particles are not accreted to the core in the rotating simulation with a dense core. A mechanism
+driving this is clearly missing from this papers computational model. It is reasonable to assume
+that the main missing mechanism is viscosity; the lack of accretion above all else suggests a lack
+of dissipation of kinetic energy. Implementing viscosity would therefore be the most important step
+towards improving the simulation.
+
+Additionally, the particle nature of SPH makes the final simulation more particle-like than a real
+gas. This can for example be seen through the fast ejection of single particles involved in
+gravitational close encounters at the beginning of the simulations. It is however likely that this
+affects the vast majority of the particles only negligibly.
+
+Finally, the choice of $|N_i| = 30$ was arbitrarily made for computational reasons - yet it
+determines the resolution and distance at which the particles interact with each other as a gas.
+Further investigating this parameter and through it the smoothing length is crucial for
+understanding smoothed-particle hydrodynamics.
+
 \end{document}
