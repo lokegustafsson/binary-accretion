@@ -1,5 +1,14 @@
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
-\todo{Todo!}
+Smoothed-particle hydrodynamics (SPH) is a lagrangian, particle-based, method in
+computational fluid dynamics (CFD) that is especially suited to simulations where processes on
+wildly different spatial scales are relevant. This work implements SPH with self-gravity among the
+particles. The simulation models adiabatic, compressible flow, but viscosity is ignored.
+
+Four simulations of a protostellar gas cloud are performed on a personal computer. The results show
+that the simulation conserves momentum and that the gas experiences adiabatic heating. However,
+energy is not strictly conserved - in particular, the transformation between thermal and kinetic
+energy is not conservative. Additionally, kinetic energy is not dissipated which prevents accretion.
+It should be possible to solve these problems by implementing viscosity.
 \end{document}
