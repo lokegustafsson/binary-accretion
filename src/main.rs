@@ -32,7 +32,7 @@ pub fn main() {
     window.limit_update_rate(None);
 
     let mut last_time = Instant::now();
-    let mut seconds_per_tick = 1.0/30.0;
+    let mut seconds_per_tick = 1.0 / 30.0;
     let mut tick = 0;
 
     println!("UPS Years    Move    Energy    Poten   Kinetic  Temp Pressure");
