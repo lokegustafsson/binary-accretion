@@ -9,6 +9,7 @@
       defaultPackage.${system} = pkgs.mkShell {
         name = "nixshell";
         buildInputs = with pkgs; [
+          cargo
           # cargo build will through minifb -> x11_dl -> pkg-config run:
           #     pkg-config --variable=libdir x11
           #     pkg-config --variable=libdir xcursor

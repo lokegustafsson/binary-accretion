@@ -3,14 +3,15 @@ use crate::vector::Float;
 // Program
 pub const WIDTH: usize = 800;
 pub const HEIGHT: usize = 800;
+pub const SIDE_VIEW: bool = true;
 
 // Computational
 pub const COUNT: usize = 2000;
 pub const DELTA_T: Float = 500.0 * YEAR;
 // General initial conditions
 pub const RADIUS: Float = 10_000.0 * AU;
-pub const ROTATIONAL_PERIOD: Float = 1e7 * YEAR;
-pub const DENSITY_CURVE: DensityCurve = DensityCurve::Uniform;
+pub const ROTATIONAL_PERIOD: Float = 1e6 * YEAR;
+pub const DENSITY_CURVE: DensityCurve = DensityCurve::InverseQuadratic;
 // Gravity
 pub const ENABLE_GRAVITY: bool = true;
 pub const MASS: Float = 1.0 * SOLAR_MASS;
@@ -45,6 +46,8 @@ pub const INITIAL_THERMAL_ENERGY: Float =
 // Mathematical
 pub const PI: Float = std::f64::consts::PI as Float;
 pub const TWO_PI: Float = 2.0 * std::f64::consts::PI as Float;
+pub const EPSILON: Float = std::f64::EPSILON;
+pub const FLOAT_ZERO: Float = 0.0;
 
 // Physical
 pub const GRAVITATIONAL_CONSTANT: Float = 6.674e-11;

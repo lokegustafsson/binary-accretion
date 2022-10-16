@@ -1,5 +1,5 @@
 use crate::constants::{
-    DensityCurve::*, COUNT, DELTA_T, DENSITY_CURVE, ENABLE_GAS_DYNAMICS, ENABLE_GRAVITY,
+    DensityCurve::*, COUNT, DELTA_T, DENSITY_CURVE, ENABLE_GAS_DYNAMICS, ENABLE_GRAVITY, EPSILON,
     INITIAL_THERMAL_ENERGY, RADIUS, ROTATIONAL_PERIOD, TWO_PI, VELOCITY_AVERAGING,
 };
 use crate::neighbors::*;
@@ -80,7 +80,7 @@ impl Simulation {
                     &*surround_pos[i],
                     &*surround_smooth[i],
                 )
-                .max(std::f64::EPSILON)
+                .max(EPSILON)
             })
             .collect();
         // Update positions and velocities
@@ -154,9 +154,9 @@ impl Simulation {
             self.velocities[i] += deltas[i].1;
             self.thermal_energies[i] = (self.thermal_energies[i] + deltas[i].2).max(0.0);
         }
-        // Translate to place center of mass at origo
+        // Translate to place center of mass at the origin
         let center_of_mass: Vector3 =
-            self.positions.iter().map(|&p| p).sum::<Vector3>() / COUNT as f64;
+            self.positions.iter().map(|&p| p).sum::<Vector3>() / COUNT as Float;
         for p in self.positions.iter_mut() {
             *p -= center_of_mass;
         }

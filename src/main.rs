@@ -24,10 +24,15 @@ pub fn main() {
         HEIGHT as Float * 4.0 * RADIUS / cmp::min(WIDTH, HEIGHT) as Float,
     );
 
-    let mut window =
-        Window::new("Test", WIDTH, HEIGHT, WindowOptions::default()).unwrap_or_else(|e| {
-            panic!("{}", e);
-        });
+    let mut window = Window::new(
+        "SPH Project",
+        WIDTH + 6,
+        HEIGHT + 6,
+        WindowOptions::default(),
+    )
+    .unwrap_or_else(|e| {
+        panic!("{}", e);
+    });
 
     window.limit_update_rate(None);
 

@@ -1,4 +1,4 @@
-use crate::constants::TWO_PI;
+use crate::constants::{SIDE_VIEW, TWO_PI};
 use crate::vector::{Float, Vector3};
 
 pub struct Camera {
@@ -13,7 +13,11 @@ impl Camera {
     pub fn new(pos: Vector3, width: Float, height: Float) -> Self {
         Camera {
             pos,
-            horizontal: Vector3::unit_x(),
+            horizontal: if SIDE_VIEW {
+                Vector3::unit_z()
+            } else {
+                Vector3::unit_x()
+            },
             vertical: Vector3::unit_y(),
             horizontal_length: width,
             vertical_length: height,

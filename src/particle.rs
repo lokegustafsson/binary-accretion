@@ -1,5 +1,5 @@
 use crate::constants::{
-    GRAVITATIONAL_CONSTANT, NEIGHBORS, PARTICLE_MASS, PI, SMOOTHING_DIST_FACTOR,
+    GRAVITATIONAL_CONSTANT, NEIGHBORS, PARTICLE_MASS, PI, SMOOTHING_DIST_FACTOR, FLOAT_ZERO,
 };
 use crate::vector::{Float, Vector3};
 
@@ -7,7 +7,7 @@ pub fn smoothing_length(self_pos: Vector3, surround_pos: &[Vector3]) -> Float {
     surround_pos
         .iter()
         .map(|&other_pos| (other_pos - self_pos).norm_squared())
-        .fold(0.0_f64, |a, b| a.max(b))
+        .fold(FLOAT_ZERO, |a, b| a.max(b))
         .sqrt()
         / SMOOTHING_DIST_FACTOR
 }
